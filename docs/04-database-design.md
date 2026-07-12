@@ -57,6 +57,18 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 
 *Decision:* pivot PK is composite — no surrogate id; duplicates impossible by construction. CASCADE is safe: losing a role assignment when a user/role is removed has no legal meaning.
 
+**`otp_codes`** *(implementation addition, Sprint 1 — not in the original 22-table catalog)*
+| Column | Type | Constraints |
+|---|---|---|
+| **phone** | VARCHAR(20) | IX(phone, consumed_at) |
+| **code_hash** | VARCHAR(255) | hashed OTP, never stored in plaintext |
+| full_name | VARCHAR(120) | nullable — staged for user creation on first verify |
+| **attempts** | TINYINT UNSIGNED | default 0 |
+| **expires_at** | TIMESTAMP | |
+| consumed_at | TIMESTAMP | nullable |
+
+*Decision:* FR-A1 requires phone+OTP registration/login but doc 04 §2.1 had no table to hold in-flight OTP challenges. Added as a plain mutable table (not part of the case/claim integrity chain, so none of the append-only/versioning rules apply). See DECISIONS.md 2026-07-12.
+
 ### 2.2 Registry
 
 **`vehicles`** *(soft deletes — G4)*
