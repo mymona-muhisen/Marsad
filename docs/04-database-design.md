@@ -234,7 +234,7 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 
 ### 2.6 Cross-Cutting
 
-**`notifications`**
+**`notifications`** *(pulled early into Sprint 2 for FR-R4 policy-expiry reminders — see DECISIONS.md)*
 | **user_id** FK CASCADE · **channel** VARCHAR(10) CK: sms, inapp · **template** VARCHAR(50) · **payload** JSON · sent_at TIMESTAMP nullable · read_at TIMESTAMP nullable · IX(user_id, read_at) |
 
 **`audit_logs`** *(append-only)*

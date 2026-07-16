@@ -42,4 +42,10 @@ return [
         'log_channel' => env('SMS_LOG_CHANNEL', 'stack'),
     ],
 
+    'policy_verifier' => [
+        // 'manual' (default) is an insurer_agent deciding in the back-office
+        // queue (FR-R3); an 'api' driver is added when an insurer exposes one.
+        'driver' => env('POLICY_VERIFIER_DRIVER', 'manual'),
+    ],
+
 ];
