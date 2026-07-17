@@ -133,6 +133,8 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | unregistered_phone | VARCHAR(20) | nullable |
 | statement_text | TEXT | nullable |
 | joined_at | TIMESTAMP | nullable |
+| join_token | VARCHAR(64) | nullable, **UQ** — implementation addition, Sprint 3 (see DECISIONS.md): the counterparty's signed, expiring deep-link credential |
+| join_token_expires_at | TIMESTAMP | nullable — 24h from case creation; nulled on join or on `masar:flag-one-sided-cases` expiry |
 | UQ | | `UQ(case_id, role)` for the pilot's 2-party scope — dropped when multi-vehicle lands |
 
 *Decision — the nullable triple is the "verification-flexible" pillar in schema form:* hit-and-run = all three null + `unregistered_plate`; uninsured = policy null. Every real-world degraded case is representable without dummy rows.
@@ -162,6 +164,17 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | IX | | `IX(surveyor_id, status)` — surveyor's active queue |
 
 *Decision:* multiple dispatch rows per case are allowed (decline → reassign creates a new row) — the full assignment history is the accountability record; no overwriting.
+
+**`fraud_flags`** *(append-only, implementation addition — Sprint 3, not in the original 22-table catalog)*
+| Column | Type | Constraints |
+|---|---|---|
+| **case_id** | FK → accident_cases | RESTRICT — the case where the new upload happened |
+| **evidence_item_id** | FK → evidence_items | RESTRICT — the newly-uploaded item that triggered the flag |
+| **matched_evidence_item_id** | FK → evidence_items | RESTRICT — the pre-existing item elsewhere with the same hash |
+| **reason** | VARCHAR(50) | e.g. `duplicate_photo_hash` |
+| **created_at** | TIMESTAMP | append-only — no `updated_at` |
+
+*Decision:* CLAUDE.md rule #3 requires a fraud flag when a duplicate SHA-256 hash is found in another case. A dedicated table (rather than metadata on `evidence_items`) keeps `evidence_items` genuinely append-only while still allowing a flag's own lifecycle (e.g., an ops reviewer dismissing a false positive, Sprint 7) and gives Sprint 7's fraud-flags ops list a clean, independently queryable source. See DECISIONS.md 2026-07-17.
 
 ### 2.4 Fault & Reports
 
