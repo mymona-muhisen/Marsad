@@ -107,7 +107,7 @@ This document records architectural and implementation decisions made during dev
 **Decision:** Designed the full `CaseStatus` 12-state transition map (`CaseLifecycleService::TRANSITIONS`), since doc 04 §2.3 only lists the value set and names the general forward order (draft → submitted → under_review → awaiting_counterparty → evidence_complete → adjudication → decision_issued → objection_window → final → closed, plus cancelled/escalated) without an exhaustive allowed-transitions matrix. The implemented map:
 - `draft → {submitted, cancelled}`
 - `submitted → {under_review, cancelled}`
-- `under_review → {awaiting_counterparty, evidence_complete, escalated, cancelled}` (the `evidence_complete` branch is for a declared hit-and-run: there is no counterparty to wait on, so the case skips the wait state entirely instead of idling for the 24h timer)
+- `under_review → {awaiting_counterparty, evidence_complete, escalated, cancelled}` (the `evidence_complete` branch was originally for a declared hit-and-run with no counterparty to wait on; Sprint 4 revised this — see 2026-07-17 (Sprint 4) below — a hit-and-run is now also gated on any pending surveyor dispatch, since hit-and-run always triages to `dispatch_required`)
 - `awaiting_counterparty → {evidence_complete, escalated, cancelled}`
 - `evidence_complete → {adjudication, escalated}`
 - `adjudication → {decision_issued, escalated}`
@@ -160,6 +160,39 @@ This document records architectural and implementation decisions made during dev
 **Reason:** Doc 04 says evidence rows "store geotag + captured_at," but Sprint 3 is a backend-only sprint — true per-photo geotag precision is a mobile/wizard (frontend) concern that belongs to Sprint 9's guided capture UI, which can pass distinct per-file coordinates once it exists. Extracting EXIF server-side would add an image-processing dependency for marginal accuracy gain over the case-level location already captured at report time.
 
 **Impact:** All evidence for a given case currently shares one lat/lng pair (the case's own). `EvidenceService::storeOne()`'s `$lat`/`$lng` parameters already accept per-file overrides, so Sprint 9 can wire distinct coordinates through without a service-layer change.
+
+---
+
+### 2026-07-17 (Sprint 4)
+
+**Decision:** Added `users.zone` (VARCHAR(80), nullable) — not in doc 04's original catalog. Doc 04 §2.1 updated in the same change.
+
+**Reason:** FR-C5 requires assigning "the nearest available surveyor by zone," but doc 04 has no column anywhere recording which zone a surveyor belongs to (`accident_cases.region` exists for the case side, but nothing mirrors it on `users`). `config/zones.php` defines the pilot's flat zone-name list (no real geo-distance routing yet); `DispatchService::pickSurveyor()` matches a case's `region` directly against a surveyor's `zone` string.
+
+**Impact:** Surveyor accounts must have `zone` set (e.g., via `OrganizationSeeder`/an admin screen, not built yet) to be preferentially matched; a surveyor with `zone = null` is still assignable as a fallback when no zone match exists in `pickSurveyor()`.
+
+---
+
+### 2026-07-17 (Sprint 4)
+
+**Decision:** Added `evidence_items.idempotency_key` (UUID, nullable, `UQ(case_id, idempotency_key)`) — not in doc 04's original catalog. Doc 04 §2.3 updated in the same change.
+
+**Reason:** Sprint 4 task 2 explicitly requires "idempotent uploads (client-generated UUID per file so retries don't duplicate) — this is the offline-tolerance contract for the frontend," and doc 04's `evidence_items` table has no column to detect a retried upload. `EvidenceService::storeOne()` now checks for an existing row with the same `(case_id, idempotency_key)` before creating a new one, returning the existing row on a repeat instead of inserting a duplicate.
+
+**Impact:** Only surveyor dispatch uploads use this today (`DispatchController::complete()`); citizen/counterparty evidence uploads (Sprint 3) don't send a key and remain unaffected (`idempotency_key` stays null for them, and NULLs don't collide under MySQL's unique index semantics).
+
+---
+
+### 2026-07-17 (Sprint 4)
+
+**Decision:** Reworked how `dispatch_required` cases reach `evidence_complete`, changing Sprint 3's original behavior:
+1. A hit-and-run case (`hit_and_run=true`) no longer transitions to `evidence_complete` immediately at creation — since hit-and-run always triages to `dispatch_required` (config/triage.php), it now waits for the assigned surveyor's dispatch to complete, same as any other dispatch_required case. `one_sided_flag` is still set immediately (it's just descriptive metadata); only the lifecycle transition was deferred.
+2. `CaseLifecycleService::canTransition()` (non-throwing check) was added, and every call site that can independently reach `evidence_complete` — `CaseService::join()`, `OneSidedCaseFlaggingService::run()`, and the new `DispatchService::complete()` — now guards its transition attempt with it instead of calling `transition()` unconditionally.
+3. Case creation calls `DispatchService::assign()` when `track === dispatch_required`, right after the counterparty invite (or the hit-and-run party row) is created.
+
+**Reason:** Sprint 3 always immediately transitioned hit-and-run cases to `evidence_complete`, which made the `dispatch_required` track meaningless for exactly the scenario it exists for (an unidentified counterparty needing independent surveyor documentation). Sprint 4 task 3 ("on-scene → completed transitions update case to evidence_complete via CaseLifecycleService") only specifies that the dispatch-completion event triggers this transition — it doesn't mandate that a counterparty-side resolution must also be blocked pending dispatch, or vice versa. Rather than building strict AND-semantics across two independent conditions (which would need tracking both explicitly, since a single `status` column can't represent "waiting on two things" as a state), a simpler design was chosen: whichever of {counterparty resolves, dispatch completes} happens first wins the transition; the second is a silent no-op via `canTransition()`, never an exception.
+
+**Impact:** For a `dispatch_required` case with both a real counterparty invite *and* a surveyor dispatch in flight, the case can reach `evidence_complete` before the surveyor finishes, if the counterparty joins (or times out) first — the case does not wait for both. If a future sprint decides both must complete (e.g., to strengthen evidentiary requirements before adjudication), that requires either a new intermediate status or a dedicated boolean gate column, since the 12-state enum's value set is fixed by doc 04.
 
 ## Template
 

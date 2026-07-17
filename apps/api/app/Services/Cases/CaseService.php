@@ -6,6 +6,7 @@ use App\Contracts\SmsGateway;
 use App\Enums\CaseChannel;
 use App\Enums\CasePartyRole;
 use App\Enums\CaseStatus;
+use App\Enums\CaseTrack;
 use App\Enums\EvidenceType;
 use App\Enums\VerificationStatus;
 use App\Models\AccidentCase;
@@ -22,6 +23,7 @@ class CaseService
         private readonly CaseLifecycleService $lifecycle,
         private readonly TriageService $triage,
         private readonly EvidenceService $evidence,
+        private readonly DispatchService $dispatch,
         private readonly SmsGateway $smsGateway,
     ) {}
 
@@ -86,32 +88,42 @@ class CaseService
                 'unregistered_plate' => $data['counterparty_plate'] ?? null,
             ]);
 
-            $this->lifecycle->transition($case, CaseStatus::EvidenceComplete);
             $case->forceFill(['one_sided_flag' => true])->save();
+        } else {
+            $token = Str::random(64);
+            $phone = $data['counterparty_phone'] ?? $counterpartyVehicle?->owner?->phone;
 
-            return $case->refresh();
+            CaseParty::create([
+                'case_id' => $case->id,
+                'user_id' => $counterpartyVehicle?->owner_id,
+                'vehicle_id' => $counterpartyVehicle?->id,
+                'policy_id' => $counterpartyPolicyId,
+                'role' => CasePartyRole::Counterparty,
+                'unregistered_plate' => $data['counterparty_plate'] ?? null,
+                'unregistered_phone' => $phone,
+                'join_token' => $token,
+                'join_token_expires_at' => now()->addHours(24),
+            ]);
+
+            $this->lifecycle->transition($case, CaseStatus::AwaitingCounterparty);
+
+            $this->smsGateway->send(
+                $phone,
+                "تم تسجيلك كطرف في حادث مروري رقم {$case->case_no}. لإكمال بيانك: ".config('app.url')."/join/{$token}",
+            );
         }
 
-        $token = Str::random(64);
-
-        CaseParty::create([
-            'case_id' => $case->id,
-            'user_id' => $counterpartyVehicle?->owner_id,
-            'vehicle_id' => $counterpartyVehicle?->id,
-            'policy_id' => $counterpartyPolicyId,
-            'role' => CasePartyRole::Counterparty,
-            'unregistered_plate' => $data['counterparty_plate'] ?? null,
-            'unregistered_phone' => $data['counterparty_phone'] ?? null,
-            'join_token' => $token,
-            'join_token_expires_at' => now()->addHours(24),
-        ]);
-
-        $this->lifecycle->transition($case, CaseStatus::AwaitingCounterparty);
-
-        $this->smsGateway->send(
-            $data['counterparty_phone'],
-            "تم تسجيلك كطرف في حادث مروري رقم {$case->case_no}. لإكمال بيانك: ".config('app.url')."/join/{$token}",
-        );
+        if ($track === CaseTrack::DispatchRequired) {
+            // The surveyor's on-scene -> completed transition (Sprint 4) is
+            // what ultimately reaches evidence_complete for this track — not
+            // this immediate creation call. See DECISIONS.md.
+            $this->dispatch->assign($case->refresh());
+        } elseif ($hitAndRun && $this->lifecycle->canTransition($case, CaseStatus::EvidenceComplete)) {
+            // Only reachable here when hit-and-run already resolved the
+            // counterparty side (one_sided_flag) — a freshly-created,
+            // not-yet-joined counterparty invite must never be skipped.
+            $this->lifecycle->transition($case, CaseStatus::EvidenceComplete);
+        }
 
         return $case->refresh();
     }
@@ -152,7 +164,14 @@ class CaseService
             $this->evidence->storeOne($case, $counterpartyParty, $joiningUser, EvidenceType::Voice, $voiceStatement, (float) $case->lat, (float) $case->lng);
         }
 
-        return $this->lifecycle->transition($case, CaseStatus::EvidenceComplete);
+        // Guarded, not unconditional: a dispatch_required case also needs
+        // its surveyor dispatch to complete (App\Services\Cases\DispatchService)
+        // — whichever finishes first wins, the other is a silent no-op.
+        if ($this->lifecycle->canTransition($case, CaseStatus::EvidenceComplete)) {
+            return $this->lifecycle->transition($case, CaseStatus::EvidenceComplete);
+        }
+
+        return $case->refresh();
     }
 
     private function activePolicyId(Vehicle $vehicle): ?int

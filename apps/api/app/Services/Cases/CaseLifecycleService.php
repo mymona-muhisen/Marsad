@@ -59,6 +59,17 @@ class CaseLifecycleService
     }
 
     /**
+     * Non-throwing check, for call sites that race with another trigger for
+     * the same target status (Sprint 4: a dispatch completing and a
+     * counterparty joining can both attempt evidence_complete — whichever
+     * fires first should win silently, not throw on the other's attempt).
+     */
+    public function canTransition(AccidentCase $case, CaseStatus $to): bool
+    {
+        return in_array($to->value, self::TRANSITIONS[$case->status->value], true);
+    }
+
+    /**
      * @return list<string>
      */
     public function allowedTransitions(CaseStatus $from): array

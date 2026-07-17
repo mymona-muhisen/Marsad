@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\CaseJoinController;
 use App\Http\Controllers\Api\V1\EvidenceController;
 use App\Http\Controllers\Api\V1\Insurer\PolicyController as InsurerPolicyController;
 use App\Http\Controllers\Api\V1\PolicyController;
+use App\Http\Controllers\Api\V1\Surveyor\DispatchController as SurveyorDispatchController;
 use App\Http\Controllers\Api\V1\VehicleController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,5 +35,13 @@ Route::prefix('v1')->group(function () {
         Route::post('cases/join/{token}', [CaseJoinController::class, 'join']);
         Route::get('cases/{case}', [CaseController::class, 'show']);
         Route::post('evidence/{evidence}/supersede', [EvidenceController::class, 'supersede']);
+
+        Route::prefix('surveyor')->middleware('role:surveyor')->group(function () {
+            Route::get('dispatches', [SurveyorDispatchController::class, 'index']);
+            Route::post('dispatches/{dispatch}/accept', [SurveyorDispatchController::class, 'accept']);
+            Route::post('dispatches/{dispatch}/decline', [SurveyorDispatchController::class, 'decline']);
+            Route::post('dispatches/{dispatch}/on-scene', [SurveyorDispatchController::class, 'markOnScene']);
+            Route::post('dispatches/{dispatch}/complete', [SurveyorDispatchController::class, 'complete']);
+        });
     });
 });

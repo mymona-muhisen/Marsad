@@ -31,6 +31,7 @@ class UserFactory extends Factory
             'phone_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'organization_id' => null,
+            'zone' => null,
             'locale' => 'ar',
             'status' => 'active',
         ];
@@ -53,6 +54,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'organization_id' => $organizationId,
+        ]);
+    }
+
+    /**
+     * Assign a surveyor's home zone (FR-C5 dispatch assignment).
+     */
+    public function inZone(string $zone): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'zone' => $zone,
         ]);
     }
 }

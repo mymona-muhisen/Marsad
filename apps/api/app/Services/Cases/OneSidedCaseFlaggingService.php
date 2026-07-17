@@ -28,7 +28,14 @@ class OneSidedCaseFlaggingService
             $case = $party->case;
 
             $case->forceFill(['one_sided_flag' => true])->save();
-            $this->lifecycle->transition($case, CaseStatus::EvidenceComplete);
+
+            // Guarded, not unconditional: a dispatch_required case races
+            // against DispatchService::complete() for the same transition
+            // (App\Services\Cases\DispatchService) — whichever fires first
+            // wins, this is a silent no-op if the surveyor already did.
+            if ($this->lifecycle->canTransition($case, CaseStatus::EvidenceComplete)) {
+                $this->lifecycle->transition($case, CaseStatus::EvidenceComplete);
+            }
 
             $party->forceFill(['join_token' => null, 'join_token_expires_at' => null])->save();
 

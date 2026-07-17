@@ -29,6 +29,7 @@ class User extends Authenticatable
         'national_id',
         'password',
         'organization_id',
+        'zone',
         'locale',
         'status',
         'phone_verified_at',
@@ -80,5 +81,13 @@ class User extends Authenticatable
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * @return HasMany<Dispatch, $this>
+     */
+    public function dispatches(): HasMany
+    {
+        return $this->hasMany(Dispatch::class, 'surveyor_id');
     }
 }
