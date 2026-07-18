@@ -194,6 +194,66 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** For a `dispatch_required` case with both a real counterparty invite *and* a surveyor dispatch in flight, the case can reach `evidence_complete` before the surveyor finishes, if the counterparty joins (or times out) first — the case does not wait for both. If a future sprint decides both must complete (e.g., to strengthen evidentiary requirements before adjudication), that requires either a new intermediate status or a dedicated boolean gate column, since the 12-state enum's value set is fixed by doc 04.
 
+---
+
+### 2026-07-18 (Sprint 5)
+
+**Decision:** `reports.case_id` is a plain indexed column, not the strict `UNIQUE` doc 04 §2.4 literally specifies.
+
+**Reason:** Doc 04 states both "`case_id` FK **UQ** RESTRICT (1:1)" *and*, in the same section's decision note, that "appeal outcomes issue a **new** report row and mark the old one `superseded`" — these two statements are mutually exclusive under a strict per-case UQ (MySQL can't express "at most one row where status=active" as a partial unique index, the same limitation doc 04 already acknowledges for `vehicles.plate_no`). Since the supersede-chain mechanism is an explicit, tested Sprint 5 deliverable (task 7), the UQ was dropped in favor of a plain index; "at most one **active** report per case" is enforced at the service layer instead (`ReportService::generate()` always looks up and closes out any existing active report before/after inserting the new one).
+
+**Impact:** Nothing prevents a stray second `active` row via a raw DB write outside `ReportService`; all report creation must go through `ReportService::generate()` to preserve the invariant. `reports.case_id` keeps its FK/RESTRICT behavior, just not the uniqueness.
+
+---
+
+### 2026-07-18 (Sprint 5)
+
+**Decision:** The report PDF is generated (`GenerateFaultReport` queued job) immediately when a fault decision is confirmed — i.e., at the `decision_issued` transition, *before* the case moves into `objection_window` — not gated on the case reaching the literal `final` status.
+
+**Reason:** Sprint 5 task 5 says "queued job **on final**," which read literally would mean no report exists until after the 72h objection window closes or is resolved — but then the "supersede chain on appeal amendments" (also task 5) could never actually fire, since an objection-upheld amendment needs a *pre-existing* report to supersede. Doc 01 A.3's own Najm-workflow narrative supports the earlier-issuance reading too: report issuance (~24h) is described as preceding/overlapping the objection process, not gated behind it. "On final" is interpreted here as "once the fault-finding step is finalized/confirmed" (i.e., `decision_issued`), not literally `CaseStatus::Final`.
+
+**Impact:** Every confirmed decision gets exactly one report immediately, whether or not it's later objected to. If upheld, `ObjectionService::resolve()` dispatches a second `GenerateFaultReport` job, and `ReportService::generate()` marks the first `superseded`. If dismissed or the window lapses untouched, the original report simply stays `active` — no second job runs.
+
+---
+
+### 2026-07-18 (Sprint 5)
+
+**Decision:** `LiabilityRuleSeeder` seeds exactly 10 real scenario rows (`REAR_END`, `PRIORITY_VIOLATION`, `LANE_CHANGE`, `REVERSING`, `RED_LIGHT`, `PARKED_HIT`, `OPENING_DOOR`, `ROUNDABOUT`, `OVERTAKING`, `MERGING`) — "MANUAL" from the sprint task's example list is deliberately **not** a seeded row.
+
+**Reason:** Doc 04 §2.4 explicitly justifies `fault_decisions.rule_id` being nullable as "(MANUAL scenario)" — i.e., MANUAL is represented by the *absence* of a rule (`rule_id = null`), not a row in `liability_rules`. Seeding a literal `MANUAL` row would contradict that schema decision and give `FaultDecisionService::decide()` two different ways to express the same thing. `MERGING` was added as the 10th real scenario to still satisfy "at least 10" once MANUAL is excluded.
+
+**Impact:** `DecideFaultRequest`/`FaultDecisionService::decide()` treat `scenario_code = null` (not `"MANUAL"`) as the manual path — always `was_overridden = true`, justification always required.
+
+---
+
+### 2026-07-18 (Sprint 5)
+
+**Decision:** `FaultDecisionService::decide()` is the *only* adjudication endpoint — it both proposes (resolves the rule's default split) and confirms (persists the decision) in one call, immediately writing `fault_decisions.status = confirmed`. The `proposed` value in `FaultDecisionStatus` stays a valid schema/CHECK value but is never produced by any code path this sprint.
+
+**Reason:** Sprint 5 task 3 describes a single "decision endpoint pinning rule_id + matrix version" — not a separate propose-then-confirm round trip. Splitting it into two calls (preview, then persist) would need an ephemeral, never-persisted "proposal" concept the task doesn't ask for and doc 04 doesn't model with any extra column (e.g., no draft-allocations table). `proposed` remains in the enum for schema completeness/future use (e.g., if a later sprint adds a real system-auto-propose step ahead of adjudicator confirmation).
+
+**Impact:** No test exercises `FaultDecisionStatus::Proposed` — this is intentional, not an oversight. A future sprint introducing a true two-step flow would need to add a persistence point for the proposed state and its own transition rules.
+
+---
+
+### 2026-07-18 (Sprint 5)
+
+**Decision:** When a senior adjudicator **upholds** an objection, the amendment updates the *same* `fault_decisions` row and replaces its `fault_allocations` rows in place (delete + reinsert) — it does not create a second `fault_decisions` row.
+
+**Reason:** Doc 04 §2.4 keeps `fault_decisions.case_id` as a strict `UQ` (1:1 with the case), unlike `reports` where the supersede chain needed that constraint relaxed. There is no schema room for a second decision row per case, and doc 04 gives no indication this should change — the appeal-amendment concept applies to the *report* (which the doc explicitly says gets a new, superseding row), not to the decision record itself. The amendment's reasoning is appended to `justification` (`"[تعديل بعد الاعتراض]: {resolution_note}"`) so the audit trail shows both the original justification and why it changed, and `was_overridden` is forced to `true`.
+
+**Impact:** `fault_decisions`/`fault_allocations` history for an amended decision is only reconstructable via the row's current state + the linked `objections.resolution_note`, not via multiple historical decision rows the way `liability_rules` versions or superseded `reports` are. Auditability here relies on `objections` (which is never deleted or overwritten) rather than decision versioning.
+
+---
+
+### 2026-07-18 (Sprint 5)
+
+**Decision:** The Arabic RTL PDF report (`resources/views/reports/fault-report.blade.php`) is structurally correct (`dir="rtl"`, `lang="ar"`, right-aligned CSS) but uses dompdf's bundled default font, which does not include Arabic glyph coverage — Arabic text will render as missing-glyph boxes until a real Arabic-supporting font (e.g., Noto Naskh Arabic, Amiri) is bundled and registered with dompdf.
+
+**Reason:** Bundling and registering a font family with dompdf requires shipping font asset files and `config/dompdf.php` font-directory wiring — a design/asset task orthogonal to this sprint's backend scope (PDF generation pipeline, hashing, QR token, supersede chain). The generation mechanism, hash integrity, and structural RTL layout are all fully functional and tested now; only the visual glyph rendering is incomplete.
+
+**Impact:** Anyone opening a generated PDF today will see correctly-positioned RTL layout with unreadable Arabic body text. This must be fixed (bundle + register an Arabic font in `config/dompdf.php`) before any real demo or user-facing use of the report PDF — flagged here so it isn't mistaken for "done."
+
 ## Template
 
 ### YYYY-MM-DD
