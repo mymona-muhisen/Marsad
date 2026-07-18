@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             OrganizationSeeder::class,
             LiabilityRuleSeeder::class,
+            PartsPriceSeeder::class,
         ]);
     }
 }

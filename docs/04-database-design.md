@@ -231,9 +231,11 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | IX | | `IX(insurer_org_id, status)` — the insurer console's main query |
 
 **`claim_events`** *(append-only timeline)*
-| **claim_id** FK RESTRICT · **actor_id** FK users RESTRICT · **action** VARCHAR(40) · reason_code VARCHAR(20) nullable · note TEXT nullable · **created_at** · IX(claim_id, created_at) |
+| **claim_id** FK RESTRICT · actor_id FK users RESTRICT, nullable (see implementation note) · **action** VARCHAR(40) · reason_code VARCHAR(20) nullable · note TEXT nullable · **created_at** · IX(claim_id, created_at) |
 
 *Decision:* the claimant-visible timeline and SLA measurement both read this table — status alone loses history ("when did it enter assessing?"). Append-only, no updates ever.
+
+*Implementation note (Sprint 6, see DECISIONS.md):* `actor_id` is nullable, not NOT NULL as originally written above — some events are genuinely system-generated (claim auto-open on case finalization, scheduled SLA-breach flagging) with no human actor to attribute them to. Forcing a fabricated human FK there would misrepresent the audit trail rather than strengthen it. Human-triggered events (decided, estimate_submitted, settled, closed) still always carry a real `actor_id`.
 
 **`damage_estimates`**
 | **claim_id** FK RESTRICT · **submitted_by** FK users RESTRICT · org_id FK organizations nullable · **type** VARCHAR(20) CK: workshop, assessor, desk · **status** VARCHAR(20) CK: draft, submitted, accepted, rejected · **total** DECIMAL(14,2) (G10) |

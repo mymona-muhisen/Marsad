@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('masar:policy-expiry-reminders')->daily();
 Schedule::command('masar:flag-one-sided-cases')->hourly();
 Schedule::command('masar:close-objection-windows')->hourly();
+Schedule::command('masar:flag-sla-breaches')->hourly();

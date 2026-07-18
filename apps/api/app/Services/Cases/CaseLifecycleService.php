@@ -3,6 +3,7 @@
 namespace App\Services\Cases;
 
 use App\Enums\CaseStatus;
+use App\Events\CaseFinalized;
 use App\Exceptions\InvalidTransitionException;
 use App\Models\AccidentCase;
 
@@ -54,6 +55,13 @@ class CaseLifecycleService
         }
 
         $case->forceFill(['status' => $to])->save();
+
+        if ($to === CaseStatus::Final) {
+            // Sprint 6: claims auto-open per not-at-fault party, regardless
+            // of which path (objection dismissed/upheld, or window lapsed
+            // untouched) reached `final` — see App\Listeners\OpenClaimsForFinalizedCase.
+            CaseFinalized::dispatch($case);
+        }
 
         return $case->refresh();
     }

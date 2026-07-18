@@ -4,10 +4,13 @@ namespace App\Providers;
 
 use App\Contracts\PolicyVerifier;
 use App\Contracts\SmsGateway;
+use App\Events\CaseFinalized;
+use App\Listeners\OpenClaimsForFinalizedCase;
 use App\Services\Policy\ManualPolicyVerifier;
 use App\Services\Sms\LogSmsGateway;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -44,5 +47,7 @@ class AppServiceProvider extends ServiceProvider
                 config('otp.request_max_per_window'),
             )->by($key);
         });
+
+        Event::listen(CaseFinalized::class, OpenClaimsForFinalizedCase::class);
     }
 }

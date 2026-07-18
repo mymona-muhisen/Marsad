@@ -5,9 +5,14 @@ use App\Http\Controllers\Api\V1\Adjudication\ObjectionController;
 use App\Http\Controllers\Api\V1\Auth\OtpController;
 use App\Http\Controllers\Api\V1\CaseController;
 use App\Http\Controllers\Api\V1\CaseJoinController;
+use App\Http\Controllers\Api\V1\ClaimController;
+use App\Http\Controllers\Api\V1\EstimateController;
 use App\Http\Controllers\Api\V1\EvidenceController;
+use App\Http\Controllers\Api\V1\Insurer\ClaimController as InsurerClaimController;
 use App\Http\Controllers\Api\V1\Insurer\PolicyController as InsurerPolicyController;
+use App\Http\Controllers\Api\V1\Insurer\SettlementController;
 use App\Http\Controllers\Api\V1\PolicyController;
+use App\Http\Controllers\Api\V1\Regulator\SlaReportController;
 use App\Http\Controllers\Api\V1\ReportVerifyController;
 use App\Http\Controllers\Api\V1\Surveyor\DispatchController as SurveyorDispatchController;
 use App\Http\Controllers\Api\V1\VehicleController;
@@ -35,6 +40,11 @@ Route::prefix('v1')->group(function () {
             Route::get('policies', [InsurerPolicyController::class, 'index']);
             Route::post('policies/{policy}/verify', [InsurerPolicyController::class, 'verify']);
             Route::post('policies/{policy}/reject', [InsurerPolicyController::class, 'reject']);
+
+            Route::get('claims', [InsurerClaimController::class, 'index']);
+            Route::get('claims/{claim}', [InsurerClaimController::class, 'show']);
+            Route::post('claims/{claim}/decide', [InsurerClaimController::class, 'decide']);
+            Route::post('claims/{claim}/settlement', [SettlementController::class, 'store']);
         });
 
         Route::post('cases', [CaseController::class, 'store']);
@@ -59,6 +69,13 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('adjudication')->middleware('role:senior_adjudicator')->group(function () {
             Route::post('objections/{objection}/resolve', [ObjectionController::class, 'resolve']);
+        });
+
+        Route::get('claims/{claim}', [ClaimController::class, 'show']);
+        Route::post('claims/{claim}/estimates', [EstimateController::class, 'store'])->middleware('role:assessor|workshop');
+
+        Route::prefix('regulator')->middleware('role:regulator')->group(function () {
+            Route::get('sla-report', [SlaReportController::class, 'show']);
         });
     });
 });
