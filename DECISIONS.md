@@ -254,6 +254,66 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** Anyone opening a generated PDF today will see correctly-positioned RTL layout with unreadable Arabic body text. This must be fixed (bundle + register an Arabic font in `config/dompdf.php`) before any real demo or user-facing use of the report PDF — flagged here so it isn't mistaken for "done."
 
+---
+
+### 2026-07-19 (Sprint 6)
+
+**Decision:** Claim auto-open (FR-CL1) is wired via a Laravel event, not a direct call from the fault module: `CaseLifecycleService::transition()` dispatches `App\Events\CaseFinalized` whenever the target status is `CaseStatus::Final`, and `App\Listeners\OpenClaimsForFinalizedCase` (registered in `AppServiceProvider::boot()`, no dedicated `EventServiceProvider` in Laravel 12's skeleton) calls `ClaimService::openClaimsForCase()`.
+
+**Reason:** A case can reach `final` from three different call sites (`ObjectionWindowService` when the 72h window lapses untouched, `ObjectionService::resolve()` on both dismiss and uphold) — hard-wiring a direct `ClaimService` call into all three would risk a future fourth path forgetting to open claims. Routing through the state machine's own choke point (`transition()`) guarantees the invariant "case becomes final ⇒ claims open" regardless of path, while an event (rather than a direct dependency) keeps the Cases module from needing to know Claims exists.
+
+**Impact:** Any future path that transitions a case to `Final` automatically triggers claim auto-open — this is a feature, not just cleanup; be aware of it if a future sprint adds a new final-reaching path (e.g., a manual admin override) that should *not* auto-open claims.
+
+---
+
+### 2026-07-19 (Sprint 6)
+
+**Decision:** For each `fault_allocations` row with `percentage < 100` (i.e., not fully at fault), one claim opens with `claimant_party_id` = that party and `insurer_org_id` = the *other* party's policy's insurer. In the pilot's 2-party scope this is unambiguous. A 50/50 split therefore opens two claims (one per party, each against the other's insurer) — this is the explicit Sprint 6 test case, not an edge case being tolerated. If the at-fault party has no resolvable policy/insurer (hit-and-run, uninsured), no claim opens for that pairing — there's no compulsory-pool mechanism implemented to fall back to.
+
+**Reason:** FR-CL1 says "claim auto-created for each not-at-fault party against at-fault party's insurer" — doc 04's normalization notes (§4.2) also anticipate "the responsible insurer may be assigned via the compulsory pool" for the uninsured case, but no pool organization or assignment mechanism exists in any sprint through this one, so it's intentionally left unhandled rather than inventing a fallback insurer.
+
+**Impact:** A citizen involved with an uninsured or hit-and-run at-fault party currently gets no auto-opened claim at all — they'd need a future compulsory-pool feature (or a manual/admin path, not yet built) to recover anything through this system.
+
+---
+
+### 2026-07-19 (Sprint 6)
+
+**Decision:** `claim_events.actor_id` is nullable — a deviation from doc 04's bolded (NOT NULL) `actor_id FK users RESTRICT`. It's null only for genuinely system-generated events: claim auto-open (`'opened'`) and scheduled SLA-breach flagging (`'sla_breached'`). Every human-triggered event (`'decided'`, `'estimate_submitted'`, `'settled'`, `'closed'`) still carries a real `actor_id`.
+
+**Reason:** Both automated events are triggered by scheduled commands or case-lifecycle side effects with no human in the loop at that moment. Attributing them to an arbitrarily-chosen "actor" (e.g., the fault decision's adjudicator, or a fabricated system user) would misrepresent the audit trail — it would look like that person took an action they didn't. A nullable `actor_id` states the true fact plainly instead.
+
+**Impact:** Any UI rendering the claim timeline must handle a null actor (e.g., show "النظام" / "System" instead of a name) for these two action types.
+
+---
+
+### 2026-07-19 (Sprint 6)
+
+**Decision:** `FR-CL2`'s reason-code requirement was implemented as **mandatory on every decide() outcome** (approve/partial/reject/request_info alike), not just partial/reject as UC-04's narrative emphasizes.
+
+**Reason:** FR-CL2 (doc 01) states plainly "every decision carries a reason code," which is the more authoritative, general functional requirement; UC-06's extension note only calls out partial/reject because those are the higher-stakes "bad news" decisions, not because approve/request_info are exempt. Sprint 6's own task 3 restates "reason_code mandatory" without qualification, matching FR-CL2's stricter reading.
+
+**Impact:** `App\Enums\ClaimReasonCode` is a fixed 8-value enum drafted for this sprint (doc 01/04 don't enumerate one) — values are kept to <=20 chars to fit `claim_events.reason_code VARCHAR(20)` (doc 04's column width, discovered the hard way when the first draft's longer values overflowed it in testing). A future sprint adding new reason codes must respect that same 20-char ceiling or widen the column (and document it here).
+
+---
+
+### 2026-07-19 (Sprint 6)
+
+**Decision:** `SettlementService::record()` transitions a claim through `settled` and then immediately `closed` in the same call (two separate `claim_events` rows logged), rather than exposing a distinct "close claim" endpoint.
+
+**Reason:** Doc 04/FR-CL5 describe the flow as "claim → settled → closed" but neither doc 01 nor the Sprint 6 task list describes any intervening business step between settlement and closing (no further claimant action, no additional insurer sign-off) — closing is a direct, automatic consequence of settlement in this system's scope.
+
+**Impact:** There is no way to have a claim sit in `settled` without also being `closed` — if a future requirement needs a gap between the two (e.g., a claimant confirmation step before final closure), `SettlementService` needs to stop auto-closing and a new endpoint added.
+
+---
+
+### 2026-07-19 (Sprint 6)
+
+**Decision:** "`request_info` does NOT pause SLA" (FR-CL2) is implemented by omission — no code path anywhere reads or writes `claims.sla_due_at` after claim creation. There is no pause/resume/extend mechanism at all.
+
+**Reason:** The simplest, most literal way to guarantee an insurer can never stall the SLA clock via `request_info` is to never give any code the ability to touch `sla_due_at` after it's set — not even for a legitimate-seeming reason. This is a deliberate non-feature, not an oversight.
+
+**Impact:** If a future sprint needs a genuine SLA-pause capability for some other reason (e.g., a claimant-caused delay), it must be added as new, explicit, narrowly-scoped logic — not by generalizing anything that exists today.
+
 ## Template
 
 ### YYYY-MM-DD

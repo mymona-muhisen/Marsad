@@ -118,4 +118,12 @@ class AccidentCase extends Model
     {
         return $this->hasMany(Report::class, 'case_id');
     }
+
+    /**
+     * @return HasMany<Claim, $this>
+     */
+    public function claims(): HasMany
+    {
+        return $this->hasMany(Claim::class, 'case_id');
+    }
 }

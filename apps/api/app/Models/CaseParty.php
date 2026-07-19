@@ -88,4 +88,12 @@ class CaseParty extends Model
     {
         return $this->hasMany(EvidenceItem::class, 'party_id');
     }
+
+    /**
+     * @return HasMany<Claim, $this>
+     */
+    public function claims(): HasMany
+    {
+        return $this->hasMany(Claim::class, 'claimant_party_id');
+    }
 }
