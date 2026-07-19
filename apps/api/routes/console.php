@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('masar:policy-expiry-reminders')->daily();
+Schedule::command('masar:flag-one-sided-cases')->hourly();

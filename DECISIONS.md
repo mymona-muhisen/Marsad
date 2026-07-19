@@ -100,6 +100,67 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** Every future sprint needing role/permission-gated routes or controller-level `authorize()` calls already has this wired up; no per-sprint repetition needed.
 
+---
+
+### 2026-07-17 (Sprint 3)
+
+**Decision:** Designed the full `CaseStatus` 12-state transition map (`CaseLifecycleService::TRANSITIONS`), since doc 04 §2.3 only lists the value set and names the general forward order (draft → submitted → under_review → awaiting_counterparty → evidence_complete → adjudication → decision_issued → objection_window → final → closed, plus cancelled/escalated) without an exhaustive allowed-transitions matrix. The implemented map:
+- `draft → {submitted, cancelled}`
+- `submitted → {under_review, cancelled}`
+- `under_review → {awaiting_counterparty, evidence_complete, escalated, cancelled}` (the `evidence_complete` branch is for a declared hit-and-run: there is no counterparty to wait on, so the case skips the wait state entirely instead of idling for the 24h timer)
+- `awaiting_counterparty → {evidence_complete, escalated, cancelled}`
+- `evidence_complete → {adjudication, escalated}`
+- `adjudication → {decision_issued, escalated}`
+- `decision_issued → {objection_window}`
+- `objection_window → {final, escalated}`
+- `final → {closed}`
+- `closed`, `cancelled` → terminal (no outbound transitions)
+- `escalated → {under_review, awaiting_counterparty, evidence_complete, cancelled}` (a general re-entry point for disputes/anomalies — disputed identity, hit-and-run flagged for authority attention, etc. — that resolves back into the normal flow or to cancelled)
+
+**Reason:** CLAUDE.md rule #2 requires a full allowed-transitions map and `CaseLifecycleService::transition()` to reject anything not in it; Sprint 3 explicitly requires unit-testing the *full* matrix (allowed and forbidden), which requires the map to actually be complete, not just the states Sprint 3 exercises. `escalated`'s reachability was inferred from UC-01 ext. 5a (hit-and-run → "flagged for authority attention") and UC-02 ext. 2a/4a (phone mismatch / disputed identity → "manual review" / "forced dispatch/authority path") — doc 04 does not name a dedicated status for these, so they map onto the general-purpose `escalated` state at the case level (distinct from `fault_decisions.status = objected`, which is the Fault module's own appeal state, built in Sprint 5).
+
+**Impact:** Sprints 4–7 build the adjudication/fault/claims flows on top of `evidence_complete → adjudication → decision_issued → objection_window → final → closed` without needing to touch this map. If a future sprint finds a transition the map doesn't allow, extend `CaseLifecycleService::TRANSITIONS` and update this entry + the full-matrix test together, per doc 04's "deviations require updating that doc" rule (applies here to the map's documented design, not doc 04 itself, since the map was never in doc 04 to begin with).
+
+---
+
+### 2026-07-17 (Sprint 3)
+
+**Decision:** Added a new `fraud_flags` table (not in doc 04's original 22-table catalog): `case_id`, `evidence_item_id` (the newly-uploaded item), `matched_evidence_item_id` (the pre-existing item elsewhere with the same hash), `reason`, append-only `created_at`. Doc 04 §2.3 updated in the same change.
+
+**Reason:** CLAUDE.md rule #3 requires that a duplicate SHA-256 hash found in another case "creates a fraud flag" — Sprint 3's own task list says to "decide, document" between a dedicated table or evidence-item metadata. A dedicated table was chosen over cramming flag state onto `evidence_items` because (a) `evidence_items` is append-only and a flag can legitimately need updates later (e.g., an ops reviewer dismissing a false positive, Sprint 7), and (b) Sprint 7's "fraud flags list for ops" analytics endpoint needs a clean, independently queryable log rather than scanning evidence rows for a side-channel flag.
+
+**Impact:** `EvidenceService::storeOne()` checks for a same-hash row in a different case on every upload and writes one `fraud_flags` row per match found; nothing currently reads this table besides the two Sprint 3 tests, until Sprint 7 builds the ops list view.
+
+---
+
+### 2026-07-17 (Sprint 3)
+
+**Decision:** Added `join_token` (nullable, unique, 64 chars) and `join_token_expires_at` (nullable timestamp) to `case_parties` (not in doc 04's original §2.3 description). Doc 04 §2.3 updated in the same change. The counterparty's join credential is a `Str::random(64)` opaque token, not an HMAC-signed payload — consistent with how Sanctum's plaintext tokens and `reports.qr_token` already work elsewhere in this schema.
+
+**Reason:** FR-C2/UC-01 step 7 require a "signed, expiring deep-link token" for the counterparty invite, but doc 04 has no column to hold an in-flight join credential (case_parties only has `joined_at`, set once the join actually happens). Reusing the counterparty's own `case_parties` row (created eagerly at case-submission time with `role=counterparty` and every other field nullable, matching doc 04's own "verification-flexible... nullable triple" design) avoids inventing a whole separate token table for a single credential pair, the way `otp_codes` was justified as its own table in Sprint 1 (there, many concurrent OTP attempts per phone needed independent rows; here, the pilot's `UQ(case_id, role)` already guarantees exactly one counterparty row per case).
+
+**Impact:** On successful join, `join_token`/`join_token_expires_at` are nulled to prevent reuse (a second POST with the same token 404s via `CaseService::findByJoinToken()`'s `firstOrFail()`). `masar:flag-one-sided-cases` also nulls them when the 24h window lapses, permanently closing the join window once the case has moved on.
+
+---
+
+### 2026-07-17 (Sprint 3)
+
+**Decision:** On counterparty join (`CaseService::join()`), if the case was created with a manually-entered `counterparty_phone` and the authenticated joining user's phone doesn't match it, the join is rejected outright with a 422 validation error rather than being accepted with a soft "flagged for manual review" state.
+
+**Reason:** UC-02 ext. 2a says a phone mismatch should raise "an identity flag... manual review," but no admin/staff console or review queue exists yet in this sprint (or any sprint through Sprint 7's ops tooling) to actually action such a flag — accepting the join anyway and silently marking a flag nobody can see or resolve would be worse than rejecting with a clear, actionable error the counterparty can retry (e.g., they mistyped their own number, or the reporter mistyped it).
+
+**Impact:** A legitimate counterparty whose phone genuinely doesn't match what the reporter entered (typo on either side) cannot self-serve past this — they'd need call_center/admin assistance, which doesn't exist yet either. Revisit if a later sprint builds staff tooling that can consume a real "disputed identity" flag.
+
+---
+
+### 2026-07-17 (Sprint 3)
+
+**Decision:** Evidence `lat`/`lng` are set from the parent case's `lat`/`lng` at upload time (not extracted from each photo's EXIF data or accepted as a distinct per-file field from the client).
+
+**Reason:** Doc 04 says evidence rows "store geotag + captured_at," but Sprint 3 is a backend-only sprint — true per-photo geotag precision is a mobile/wizard (frontend) concern that belongs to Sprint 9's guided capture UI, which can pass distinct per-file coordinates once it exists. Extracting EXIF server-side would add an image-processing dependency for marginal accuracy gain over the case-level location already captured at report time.
+
+**Impact:** All evidence for a given case currently shares one lat/lng pair (the case's own). `EvidenceService::storeOne()`'s `$lat`/`$lng` parameters already accept per-file overrides, so Sprint 9 can wire distinct coordinates through without a service-layer change.
+
 ## Template
 
 ### YYYY-MM-DD
