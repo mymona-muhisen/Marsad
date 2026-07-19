@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\Adjudication\AdjudicationController;
 use App\Http\Controllers\Api\V1\Adjudication\ObjectionController;
 use App\Http\Controllers\Api\V1\Auth\OtpController;
+use App\Http\Controllers\Api\V1\Authority\AnalyticsController as AuthorityAnalyticsController;
 use App\Http\Controllers\Api\V1\CaseController;
 use App\Http\Controllers\Api\V1\CaseJoinController;
 use App\Http\Controllers\Api\V1\ClaimController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Api\V1\Insurer\ClaimController as InsurerClaimControlle
 use App\Http\Controllers\Api\V1\Insurer\PolicyController as InsurerPolicyController;
 use App\Http\Controllers\Api\V1\Insurer\SettlementController;
 use App\Http\Controllers\Api\V1\PolicyController;
+use App\Http\Controllers\Api\V1\Regulator\FraudFlagController;
 use App\Http\Controllers\Api\V1\Regulator\SlaReportController;
 use App\Http\Controllers\Api\V1\ReportVerifyController;
 use App\Http\Controllers\Api\V1\Surveyor\DispatchController as SurveyorDispatchController;
@@ -30,7 +32,13 @@ Route::prefix('v1')->group(function () {
     // Public: report authenticity check (UC-07) — no auth, no personal data.
     Route::get('reports/verify/{qrToken}', [ReportVerifyController::class, 'show'])->middleware('throttle:30,1');
 
-    Route::middleware('auth:sanctum')->group(function () {
+    // Public (signature is the credential, CLAUDE.md hardening — signed
+    // temporary URLs for evidence media): no Sanctum auth on this route.
+    Route::get('evidence/{evidence}/download', [EvidenceController::class, 'download'])
+        ->name('evidence.download')
+        ->middleware(['signed', 'throttle:60,1']);
+
+    Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::apiResource('vehicles', VehicleController::class);
         Route::post('vehicles/{vehicle}/restore', [VehicleController::class, 'restore']);
         Route::post('vehicles/{vehicle}/policies', [PolicyController::class, 'store']);
@@ -61,6 +69,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::post('cases/{case}/objections', [ObjectionController::class, 'store']);
+        Route::get('evidence/{evidence}/download-url', [EvidenceController::class, 'downloadUrl']);
 
         Route::prefix('adjudication')->middleware('role:adjudicator')->group(function () {
             Route::get('queue', [AdjudicationController::class, 'queue']);
@@ -76,6 +85,12 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('regulator')->middleware('role:regulator')->group(function () {
             Route::get('sla-report', [SlaReportController::class, 'show']);
+            Route::get('fraud-flags', [FraudFlagController::class, 'show']);
+        });
+
+        Route::prefix('authority')->middleware('role:authority')->group(function () {
+            Route::get('heatmap', [AuthorityAnalyticsController::class, 'heatmap']);
+            Route::get('black-spots', [AuthorityAnalyticsController::class, 'blackSpots']);
         });
     });
 });

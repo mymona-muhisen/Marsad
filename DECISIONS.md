@@ -314,6 +314,66 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** If a future sprint needs a genuine SLA-pause capability for some other reason (e.g., a claimant-caused delay), it must be added as new, explicit, narrowly-scoped logic — not by generalizing anything that exists today.
 
+---
+
+### 2026-07-20 (Sprint 7)
+
+**Decision:** `AuditObserver` is attached only to `FaultDecision` and `Claim` (`created`/`updated`), and silently no-ops when there is no authenticated actor (`Auth::user()` is null) — matching the same principle already used for `claim_events.actor_id` (Sprint 6). "Role changes" and "reference data" (the other two categories CLAUDE.md rule #9 names) have no observer wired up.
+
+**Reason:** No sprint through Sprint 7 has ever built an admin endpoint that changes a user's role or edits `liability_rules`/`parts_prices` post-seed — both are seeder-only in this codebase today, and seeding runs via `WithoutModelEvents` (no observers fire) with no meaningful human actor to attribute a log entry to (`audit_logs.user_id` is `NOT NULL` per doc 04, unlike the nullable `claim_events.actor_id` deviation). Wiring an observer to a code path that doesn't exist yet would be untestable dead infrastructure. `FaultDecision`/`Claim` were chosen because they're the two mutation types in CLAUDE.md's list that already have real, authenticated-actor endpoints (adjudicator `decide()`, senior adjudicator objection resolution, insurer `decide()`).
+
+**Impact:** If a future sprint adds a role-management or reference-data-editing admin endpoint, wiring `FaultDecision::observe(AuditObserver::class)`-style registration to the new model is a one-line addition in `AppServiceProvider::boot()` — the `AuditLogService`/`AuditObserver` infrastructure is already generic and ready for it.
+
+---
+
+### 2026-07-20 (Sprint 7)
+
+**Decision:** The Sprint 7 task list's "fraud flags list for ops" is implemented as `GET /api/v1/regulator/fraud-flags`, gated by `role:regulator` — not a separate "ops" role or endpoint.
+
+**Reason:** Doc 01 FR-D1 is the authoritative functional requirement and explicitly lists "fraud flags" as part of the *regulator* dashboard, alongside claims volume/SLA breaches (which Sprint 6 already built under `role:regulator`). There is no "ops" role among doc 01 §B.4's 13 roles — the sprint prompt's casual phrasing doesn't override the FR. The endpoint returns aggregate counts only (`total`, `by_reason`, `daily_counts`) — never `case_id`/`evidence_item_id` — satisfying "aggregates only, no personal data" explicitly.
+
+**Impact:** None functionally; this is a routing/role placement decision. If a future sprint introduces a distinct "ops" concept (e.g., a fraud-investigation console with case-level drill-down), that would be a new, separate, more detailed endpoint — this one stays a regulator-facing aggregate.
+
+---
+
+### 2026-07-20 (Sprint 7)
+
+**Decision:** The authority heatmap buckets `accident_cases.lat`/`lng` by rounding to a configurable grid size (default `0.01`, ≈1.1km) rather than returning raw per-case coordinates; black-spot ranking groups by the existing `region` string column. Both endpoints return only bucketed/grouped counts — no `case_no`, no party data.
+
+**Reason:** FR-D2 asks for a heatmap and black-spot ranking as aggregate analytics; doc 04 already stores `region` specifically for "heatmap grouping" (§2.3 index rationale), so black-spots reuse it directly rather than introducing a second bucketing scheme. Lat/lng bucketing (vs. per-point plotting) is what keeps the heatmap an aggregate rather than a de-facto case list an authority user could correlate back to individuals via timing/location.
+
+**Impact:** Heatmap resolution is a query-time constant today (`$bucketSize` parameter, not yet exposed to the API); if a future sprint wants a caller-adjustable zoom level, `AccidentAnalyticsService::heatmap()` already accepts it as a parameter, just not yet wired to a request input.
+
+---
+
+### 2026-07-20 (Sprint 7)
+
+**Decision:** Evidence media is served only via a two-step signed-URL flow: an authenticated, policy-gated `GET /api/v1/evidence/{evidence}/download-url` issues a 30-minute `URL::temporarySignedRoute`, and the actual `GET /api/v1/evidence/{evidence}/download` (named `evidence.download`) requires only Laravel's `signed` middleware — no Sanctum token — since the signature itself is the delegated, time-limited credential. This mirrors the existing `cases/join/{token}` and `reports/verify/{qrToken}` pattern (an unguessable/signed token stands in for a session) rather than introducing a new access-control shape.
+
+**Reason:** CLAUDE.md's hardening rule explicitly asks for "signed temporary URLs for evidence media." Laravel's local filesystem disk (what `evidence`/`policies`/`reports` are stored on in this environment) has no native `Storage::temporaryUrl()` support — that's an S3-only feature — so the standard Laravel-documented workaround (a signed route wrapping the download) is used instead.
+
+**Impact:** Any client wanting to display/download evidence must first call the authenticated `download-url` endpoint to obtain a fresh signed link (they expire after 30 minutes) rather than storing/reusing `evidence_items.file_path` directly as a public URL.
+
+---
+
+### 2026-07-20 (Sprint 7)
+
+**Decision:** `Model::preventLazyLoading()` is enabled in `AppServiceProvider::boot()` for every non-production environment (local, testing). No lazy-loading violations existed anywhere in the Sprints 1–6 codebase — the full suite passed unchanged the moment it was turned on.
+
+**Reason:** CLAUDE.md hardening asks for "N+1 query audit (Laravel strict mode on in dev)." Worth noting for anyone extending this: Laravel's lazy-loading guard only fires when hydrating a **collection of 2+ models** (`Illuminate\Database\Eloquent\Builder::hydrate()` only sets the per-instance flag `if (count($items) > 1)`) — a single `Model::find()` or route-model-bound instance lazily accessing a relation is *not* flagged, since that's one extra query, not an N+1 explosion. Confirmed this understanding empirically (a 2-item collection iteration threw `LazyLoadingViolationException`; a single-record fetch did not) before relying on "the suite is green" as proof of no violations.
+
+**Impact:** Any future collection-returning code that iterates and lazily accesses a relation per row will throw immediately in dev/test (loud failure, not a silent extra query) — the fix is always to add `->with(...)` at the query site, never to catch/suppress the exception.
+
+---
+
+### 2026-07-20 (Sprint 7)
+
+**Decision:** No code-coverage percentage report was generated for task 5 ("Coverage report: >=80% on app/Services"). Instead, every `app/Services` class was manually cross-checked against the test suite (grep for direct unit-test references, then trace controller → service wiring for HTTP-level coverage), and the one real gap found (`LogSmsGateway` — always substituted by `FakeSmsGateway` in the one test file that rebinds `SmsGateway`, so its actual `Log::channel()->info()` call had no dedicated assertion) was closed with `tests/Unit/Services/Sms/LogSmsGatewayTest.php`.
+
+**Reason:** Neither Xdebug nor PCOV is installed in this PHP 8.2.12/XAMPP environment, and fetching a prebuilt Xdebug DLL from xdebug.org failed on the same TLS/network flakiness already documented in this file for GitHub package installs (`curl: (35) schannel: ... SEC_E_ILLEGAL_MESSAGE`). Installing a PHP extension requires either a working download or a local build toolchain, neither reliably available here.
+
+**Impact:** The 80% *number* is unverified — a real coverage tool could still surface untested branches/lines this manual pass missed (e.g., rarely-hit error paths inside otherwise-covered methods). Anyone with Xdebug/PCOV available should run `vendor/bin/phpunit --coverage-text` and treat any gap it finds as real; this decision only asserts that no *entire service* was found untested, not that every line is.
+
 ## Template
 
 ### YYYY-MM-DD

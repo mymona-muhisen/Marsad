@@ -17,7 +17,8 @@ class VehicleController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $vehicles = $this->vehicles->forUser($request->user())->get();
+        $vehicles = $this->vehicles->forUser($request->user())
+            ->paginate(min($request->integer('per_page', 15), 100));
 
         return VehicleResource::collection($vehicles)->response();
     }
