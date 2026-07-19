@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\PolicyVerifier;
 use App\Contracts\SmsGateway;
+use App\Services\Policy\ManualPolicyVerifier;
 use App\Services\Sms\LogSmsGateway;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -20,6 +22,12 @@ class AppServiceProvider extends ServiceProvider
             // Only a log driver exists today (manual mode, CLAUDE.md rule #4);
             // a real carrier adapter is added here behind the same interface.
             default => LogSmsGateway::class,
+        });
+
+        $this->app->bind(PolicyVerifier::class, match (config('services.policy_verifier.driver', 'manual')) {
+            // Manual mode only (FR-R3); an "api" driver is added here when an
+            // insurer exposes a real verification API.
+            default => ManualPolicyVerifier::class,
         });
     }
 
