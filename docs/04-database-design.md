@@ -212,9 +212,11 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | **decision_id** FK RESTRICT · **party_id** FK RESTRICT · **reason** TEXT · **status** VARCHAR(20) CK: open, upheld, dismissed · reviewed_by FK users nullable · resolution_note TEXT nullable · resolved_at | `UQ(decision_id, party_id)` — one objection per party per decision (the single-appeal-level rule, in schema) |
 
 **`reports`**
-| **case_id** FK **UQ** RESTRICT · **report_no** CHAR(14) **UQ** · **pdf_path** VARCHAR(255) · **qr_token** CHAR(36) **UQ** (UUIDv4 — public, unguessable, G2) · **signed_hash** CHAR(64) · **status** VARCHAR(20) CK: active, superseded · superseded_by FK reports nullable · **issued_at** DATETIME |
+| **case_id** FK RESTRICT (plain index, not UQ — see implementation note below) · **report_no** CHAR(14) **UQ** · **pdf_path** VARCHAR(255) · **qr_token** CHAR(36) **UQ** (UUIDv4 — public, unguessable, G2) · **signed_hash** CHAR(64) · **status** VARCHAR(20) CK: active, superseded · superseded_by FK reports nullable · **issued_at** DATETIME |
 
 *Decision:* appeal outcomes issue a **new** report row and mark the old one `superseded` — the QR of a stale printed report answers "superseded by report N" (UC-07 ext. 2b) precisely because old rows survive.
+
+*Implementation note (Sprint 5, see DECISIONS.md):* `case_id` is **not** a strict UQ as originally written above — a literal per-case UQ and the "new report row on appeal" decision in the same paragraph are mutually exclusive (MySQL can't express "at most one *active* row per case" as a partial unique index, the same limitation already noted for `vehicles.plate_no`). Implemented as a plain index; "at most one active report per case" is a service-layer invariant (`ReportService::generate()`), not a DB constraint.
 
 ### 2.5 Claims & Settlement
 

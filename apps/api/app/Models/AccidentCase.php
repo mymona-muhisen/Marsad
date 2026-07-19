@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -100,5 +101,21 @@ class AccidentCase extends Model
     public function fraudFlags(): HasMany
     {
         return $this->hasMany(FraudFlag::class, 'case_id');
+    }
+
+    /**
+     * @return HasOne<FaultDecision, $this>
+     */
+    public function faultDecision(): HasOne
+    {
+        return $this->hasOne(FaultDecision::class, 'case_id');
+    }
+
+    /**
+     * @return HasMany<Report, $this>
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class, 'case_id');
     }
 }

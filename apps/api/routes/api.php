@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Adjudication\AdjudicationController;
+use App\Http\Controllers\Api\V1\Adjudication\ObjectionController;
 use App\Http\Controllers\Api\V1\Auth\OtpController;
 use App\Http\Controllers\Api\V1\CaseController;
 use App\Http\Controllers\Api\V1\CaseJoinController;
 use App\Http\Controllers\Api\V1\EvidenceController;
 use App\Http\Controllers\Api\V1\Insurer\PolicyController as InsurerPolicyController;
 use App\Http\Controllers\Api\V1\PolicyController;
+use App\Http\Controllers\Api\V1\ReportVerifyController;
 use App\Http\Controllers\Api\V1\Surveyor\DispatchController as SurveyorDispatchController;
 use App\Http\Controllers\Api\V1\VehicleController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +21,9 @@ Route::prefix('v1')->group(function () {
 
     // Public: counterparty deep-link preview (UC-02 step 3 — no auth, no statement leaked).
     Route::get('cases/join/{token}', [CaseJoinController::class, 'show'])->middleware('throttle:30,1');
+
+    // Public: report authenticity check (UC-07) — no auth, no personal data.
+    Route::get('reports/verify/{qrToken}', [ReportVerifyController::class, 'show'])->middleware('throttle:30,1');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('vehicles', VehicleController::class);
@@ -42,6 +48,17 @@ Route::prefix('v1')->group(function () {
             Route::post('dispatches/{dispatch}/decline', [SurveyorDispatchController::class, 'decline']);
             Route::post('dispatches/{dispatch}/on-scene', [SurveyorDispatchController::class, 'markOnScene']);
             Route::post('dispatches/{dispatch}/complete', [SurveyorDispatchController::class, 'complete']);
+        });
+
+        Route::post('cases/{case}/objections', [ObjectionController::class, 'store']);
+
+        Route::prefix('adjudication')->middleware('role:adjudicator')->group(function () {
+            Route::get('queue', [AdjudicationController::class, 'queue']);
+            Route::post('cases/{case}/decide', [AdjudicationController::class, 'decide']);
+        });
+
+        Route::prefix('adjudication')->middleware('role:senior_adjudicator')->group(function () {
+            Route::post('objections/{objection}/resolve', [ObjectionController::class, 'resolve']);
         });
     });
 });
