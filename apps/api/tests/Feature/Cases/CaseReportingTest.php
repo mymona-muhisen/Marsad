@@ -7,49 +7,24 @@ use App\Models\AccidentCase;
 use App\Models\CaseParty;
 use App\Models\User;
 use App\Models\Vehicle;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\FakesPhotos;
 use Tests\TestCase;
 
 class CaseReportingTest extends TestCase
 {
-    use RefreshDatabase;
+    use FakesPhotos, RefreshDatabase;
 
-    /**
-     * A minimal valid 1x1 JPEG (real SOI/EOI structure), base64-encoded.
-     * `mimes:jpg` validates by sniffing actual file content, not just the
-     * extension — `UploadedFile::fake()->create()` writes an empty file
-     * (its $kilobytes only fakes the reported size) and GD isn't installed
-     * in this environment, so neither `create()` nor `image()` works here.
-     */
-    private const MINIMAL_JPEG_BASE64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=';
-
-    /**
-     * Trailing bytes after a JPEG's EOI marker don't affect MIME sniffing
-     * (finfo only inspects the header), so appending random bytes gives
-     * each photo a distinct SHA-256 while staying a validly-typed upload.
-     * Pass a fixed $suffix to make two calls hash identically on purpose.
-     */
-    private function fakePhoto(string $name, ?string $suffix = null): UploadedFile
+    protected function setUp(): void
     {
-        $path = tempnam(sys_get_temp_dir(), 'evidence');
-        file_put_contents($path, base64_decode(self::MINIMAL_JPEG_BASE64).($suffix ?? random_bytes(16)));
+        parent::setUp();
 
-        return new UploadedFile($path, $name, 'image/jpeg', null, true);
-    }
-
-    /**
-     * @return list<UploadedFile>
-     */
-    private function fourPhotos(string $prefix = 'p'): array
-    {
-        return [
-            $this->fakePhoto("{$prefix}1.jpg"),
-            $this->fakePhoto("{$prefix}2.jpg"),
-            $this->fakePhoto("{$prefix}3.jpg"),
-            $this->fakePhoto("{$prefix}4.jpg"),
-        ];
+        // dispatch_required cases now auto-assign a surveyor (Sprint 4),
+        // which resolves the role via spatie/laravel-permission and throws
+        // RoleDoesNotExist if the role isn't seeded.
+        $this->seed(RoleSeeder::class);
     }
 
     public function test_full_happy_path_report_counterparty_join_evidence_complete(): void

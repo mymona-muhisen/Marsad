@@ -48,6 +48,7 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | national_id | VARCHAR(20) | nullable, UQ (required before payout — enforced in service layer, not DB, because onboarding must stay frictionless) |
 | **password** | VARCHAR(255) | hashed |
 | organization_id | FK → organizations | nullable (citizens have none), RESTRICT |
+| zone | VARCHAR(80) | nullable — implementation addition, Sprint 4 (see DECISIONS.md): a surveyor's home zone for dispatch assignment (FR-C5); meaningless for non-surveyor roles |
 | **locale** | CHAR(2) | CK: ar, en · default ar |
 | **status** | VARCHAR(20) | CK: active, suspended · default active |
 | phone_verified_at | TIMESTAMP | nullable (OTP proof) |
@@ -148,6 +149,7 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | **type** | VARCHAR(20) | CK: photo, voice, sketch, document |
 | **file_path** | VARCHAR(255) | |
 | **sha256** | CHAR(64) | **IX** — the fraud net: duplicate detection = index lookup |
+| idempotency_key | UUID | nullable, `UQ(case_id, idempotency_key)` — implementation addition, Sprint 4 (see DECISIONS.md): client-generated UUID per file so a retried offline upload doesn't duplicate |
 | lat / lng | DECIMAL(10,7) | nullable |
 | **captured_at** | DATETIME | |
 | superseded_by | FK → evidence_items | nullable, self-reference (G4: no deletes — supersede) |

@@ -28,6 +28,7 @@ class EvidenceItem extends Model
         'type',
         'file_path',
         'sha256',
+        'idempotency_key',
         'lat',
         'lng',
         'captured_at',

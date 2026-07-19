@@ -18,6 +18,10 @@ class EvidenceService
 {
     /**
      * @param  list<UploadedFile>  $files
+     * @param  list<string|null>  $idempotencyKeys  parallel to $files — the
+     *                                              offline-tolerance contract (FR-C5): a client-generated UUID per
+     *                                              file so a retried upload after a dropped connection doesn't
+     *                                              create a duplicate evidence row.
      * @return list<EvidenceItem>
      */
     public function storePhotos(
@@ -27,11 +31,15 @@ class EvidenceService
         array $files,
         ?float $lat,
         ?float $lng,
+        array $idempotencyKeys = [],
     ): array {
-        return array_map(
-            fn (UploadedFile $file) => $this->storeOne($case, $party, $uploader, EvidenceType::Photo, $file, $lat, $lng),
-            $files,
-        );
+        $items = [];
+
+        foreach ($files as $i => $file) {
+            $items[] = $this->storeOne($case, $party, $uploader, EvidenceType::Photo, $file, $lat, $lng, $idempotencyKeys[$i] ?? null);
+        }
+
+        return $items;
     }
 
     public function storeOne(
@@ -42,7 +50,19 @@ class EvidenceService
         UploadedFile $file,
         ?float $lat,
         ?float $lng,
+        ?string $idempotencyKey = null,
     ): EvidenceItem {
+        if ($idempotencyKey !== null) {
+            $existing = EvidenceItem::query()
+                ->where('case_id', $case->id)
+                ->where('idempotency_key', $idempotencyKey)
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+        }
+
         $hash = hash_file('sha256', $file->getRealPath());
         $path = $file->store('evidence', 'public');
 
@@ -53,6 +73,7 @@ class EvidenceService
             'type' => $type,
             'file_path' => $path,
             'sha256' => $hash,
+            'idempotency_key' => $idempotencyKey,
             'lat' => $lat,
             'lng' => $lng,
             'captured_at' => now(),
