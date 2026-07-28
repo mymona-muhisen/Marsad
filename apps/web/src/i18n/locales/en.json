@@ -119,6 +119,174 @@
     "super_admin": "Technical owner"
   },
 
+  "vehicles": {
+    "title": "My vehicles",
+    "subtitle": "Add your vehicle before reporting an accident — a report is always tied to a vehicle registered in your name.",
+    "empty": "No vehicles registered yet.",
+    "add": "Add a vehicle",
+    "addTitle": "New vehicle",
+    "plateNo": "Plate number",
+    "make": "Make",
+    "makePlaceholder": "Kia, Hyundai, Mercedes…",
+    "model": "Model",
+    "year": "Year",
+    "color": "Colour",
+    "vin": "VIN",
+    "optional": "optional",
+    "save": "Save vehicle",
+    "saving": "Saving…",
+    "plateRequired": "Plate number is required.",
+    "makeRequired": "Make is required.",
+    "modelRequired": "Model is required.",
+    "yearRange": "Year must be between 1950 and 2030."
+  },
+
+  "report": {
+    "title": "Report an accident",
+    "stepOf": "Step {{current}} of {{total}}",
+    "next": "Next",
+    "previous": "Back",
+    "draftRestored": "Picked up where you left off — your details and photos are saved on this device.",
+    "discardDraft": "Start a new report",
+
+    "steps": {
+      "vehicle": "Vehicle & time",
+      "location": "Location",
+      "photos": "Photos",
+      "counterparty": "Other party",
+      "statement": "Statement",
+      "review": "Review"
+    },
+
+    "vehicle": {
+      "title": "Which vehicle was in the accident?",
+      "noVehicles": "You have no registered vehicles. Add one first, then come back to your report.",
+      "goToVehicles": "Add a vehicle",
+      "occurredAt": "When did it happen?",
+      "occurredAtHint": "An approximate date and time is fine.",
+      "injuryQuestion": "Is anyone injured?",
+      "injuryYes": "Yes, there are injuries",
+      "injuryNo": "No, material damage only",
+      "injuryWarning": "Accidents with injuries are referred to the competent authority, and your report stays on file. Call emergency services immediately if anyone is seriously hurt."
+    },
+
+    "location": {
+      "title": "Where did it happen?",
+      "useGps": "Locate me automatically",
+      "locating": "Finding your location…",
+      "denied": "Could not access your location. Enter the coordinates manually, or allow location access in your browser settings.",
+      "unsupported": "Your browser does not support geolocation. Enter the coordinates manually.",
+      "lat": "Latitude",
+      "lng": "Longitude",
+      "manualHint": "On a weak connection you can type the coordinates and adjust them later.",
+      "verified": "Location confirmed by your device",
+      "manual": "Manually entered location"
+    },
+
+    "photos": {
+      "title": "Photograph the scene",
+      "subtitle": "Four photos minimum. Follow the guide frame on each card.",
+      "capture": "Take photo",
+      "retake": "Retake",
+      "compressing": "Preparing photo…",
+      "extraTitle": "Extra photos",
+      "extraHint": "Optional — add anything that makes the scene clearer.",
+      "addExtra": "Add photo",
+      "remove": "Remove",
+      "slots": {
+        "wide": {
+          "label": "Wide shot",
+          "hint": "Step back and capture the whole scene, including the road and any signs."
+        },
+        "vehicles": {
+          "label": "Both vehicles",
+          "hint": "Show how the vehicles sit relative to each other and to the lane markings."
+        },
+        "damage": {
+          "label": "Damage close-up",
+          "hint": "Get close enough that the damage fills the frame."
+        },
+        "plate": {
+          "label": "Number plate",
+          "hint": "Capture the plate sharp and fully readable."
+        }
+      }
+    },
+
+    "counterparty": {
+      "title": "Who was the other party?",
+      "subtitle": "We'll text them a link to add their side to the same case.",
+      "phone": "Other party's phone number",
+      "plate": "Other party's plate number",
+      "plateHint": "Optional, but it speeds up verification.",
+      "hitAndRun": "The other party left the scene (hit and run)",
+      "hitAndRunHint": "Choose this and we won't ask for their details; the case is referred to the competent authority."
+    },
+
+    "statement": {
+      "title": "Tell us what happened",
+      "label": "Your statement",
+      "placeholder": "Describe it in your own words: which way you were going, roughly how fast, and what the other party did.",
+      "counter": "{{count}} / 2000 characters",
+      "voiceSoon": "Voice statements are coming soon."
+    },
+
+    "review": {
+      "title": "Review before sending",
+      "vehicle": "Vehicle",
+      "occurredAt": "Time of accident",
+      "injuries": "Injuries",
+      "location": "Location",
+      "photos": "Photos",
+      "photosCount": "{{count}} photos",
+      "counterparty": "Other party",
+      "hitAndRun": "Hit and run",
+      "statement": "Statement",
+      "edit": "Edit",
+      "submit": "Send report",
+      "submitting": "Sending…",
+      "yes": "Yes",
+      "no": "No"
+    },
+
+    "errors": {
+      "vehicleRequired": "Choose the vehicle involved.",
+      "occurredAtRequired": "Enter the date and time of the accident.",
+      "occurredAtFuture": "The accident time cannot be in the future.",
+      "injuryRequired": "Answer the injuries question.",
+      "locationRequired": "Set the accident location.",
+      "latRange": "Latitude must be between -90 and 90.",
+      "lngRange": "Longitude must be between -180 and 180.",
+      "photosRequired": "All four guided photos are required.",
+      "counterpartyPhoneRequired": "Enter the other party's phone number, or choose hit and run.",
+      "statementRequired": "Write your statement of what happened.",
+      "statementTooLong": "The statement is longer than 2000 characters.",
+      "submitFailed": "Could not send the report. Your details are saved — try again."
+    },
+
+    "success": {
+      "title": "Your report has been received",
+      "caseNo": "Case number",
+      "keepNumber": "Keep this number — it's how you follow your case at every step.",
+      "trackLabel": "Track",
+      "tracks": {
+        "fast_track": {
+          "label": "Fast track",
+          "body": "Your details are enough to handle this remotely. The other party gets a link to add their account, then the liability decision is issued."
+        },
+        "dispatch_required": {
+          "label": "Surveyor dispatch",
+          "body": "A field surveyor will be sent to inspect the accident. You'll get a text when the visit is scheduled."
+        },
+        "police_required": {
+          "label": "Referred to the authority",
+          "body": "This accident needs an official report from the competent authority. Your report is documented and will be linked to theirs when it arrives."
+        }
+      },
+      "done": "Back to home"
+    }
+  },
+
   "landing": {
     "hero": {
       "eyebrow": "A national platform for traffic accidents and motor insurance",

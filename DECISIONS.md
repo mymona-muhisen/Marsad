@@ -444,6 +444,66 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** `SessionTest` is unverified until someone starts MySQL and runs `composer test`. The three cases it covers (me returns roles, me rejects anonymous callers, logout revokes only the calling token) are the ones to watch if the endpoints misbehave.
 
+---
+
+### 2026-07-28 (Sprint 9)
+
+**Decision:** Wizard photos are persisted to **IndexedDB**, not localStorage; only the text fields go to localStorage as CLAUDE.md specifies. Slots are stored positionally, and the extras are appended only once all four guided slots are filled.
+
+**Reason:** CLAUDE.md asks for "wizard state persisted to localStorage (offline tolerance)". Four to eight photos compressed to ~300KB each are 1.5–3MB once base64-encoded — most of the typical 5MB localStorage quota, and a quota error mid-capture would silently lose the draft. IndexedDB stores blobs natively at their real size. Positional storage matters because a collapsed array would reshuffle photos between slots on reload (a damage close-up reappearing as the wide shot).
+
+**Impact:** This is a deliberate deviation from the letter of the CLAUDE.md line, in service of its stated intent. Both stores degrade to no-ops when blocked (private mode, locked-down WebViews) — a lost draft is acceptable, a wizard that will not open is not. `photo-store.ts` resolves rather than rejects on every path for that reason.
+
+---
+
+### 2026-07-28 (Sprint 9)
+
+**Decision:** The statement step ships **text only**. Voice statements are shown as "coming soon" rather than implemented.
+
+**Reason:** `StoreCaseRequest` accepts `voice_statement` as `mimes:mp3,wav,m4a,ogg`. Browser `MediaRecorder` produces `audio/webm` in Chrome and Edge (the majority of Android users this platform targets); only Firefox produces ogg. Shipping a recorder that fails validation for most users is worse than not shipping one.
+
+**Impact:** UC-01's voice-note requirement is unmet. Closing it needs a backend decision first — either add `webm` to the accepted mimes (and verify Laravel's mime detection does not classify it as `video/webm`), or transcode client-side. The statement text field satisfies the FormRequest's `required_without` pair on its own, so nothing is blocked today.
+
+---
+
+### 2026-07-28 (Sprint 9)
+
+**Decision:** The location step uses the browser Geolocation API plus manually editable latitude/longitude fields. No map library was added. `location_verified` is set true **only** for a device fix, never for typed coordinates.
+
+**Reason:** A real map needs both a library and an external tile server; the platform targets roadside use on unreliable connections, where a tile fetch is exactly what fails. Geolocation is requested with `enableHighAccuracy: false` and a 60s `maximumAge` so a coarse cell-tower fix is accepted rather than waiting out a GPS lock — doc 01 explicitly anticipates "works with cell towers if no GPS". Keeping `location_verified` honest matters because the triage and fraud rules read it.
+
+**Impact:** Users cannot yet drop a pin visually, which the design brief calls for. Adding a map later only needs to write `lat`/`lng` into the same draft fields.
+
+---
+
+### 2026-07-28 (Sprint 9)
+
+**Decision:** The guided capture has exactly four slots — wide, both vehicles, damage close-up, plate — matching the design brief's ghost-frame list, and one photo per slot is precisely the backend's `photos min:4`.
+
+**Reason:** Tying the guide to the API minimum means a user who completes the visual guide has satisfied the validation rule by construction, rather than being told "at least 4 photos" and guessing which four are useful. Extra photos are allowed but never required.
+
+**Impact:** Changing `min:4` in `StoreCaseRequest` now requires changing `PHOTO_SLOTS` too, or the wizard will let users submit reports the API rejects. `validateStep` in `steps.ts` is the single place that mirrors the FormRequest.
+
+---
+
+### 2026-07-28 (Sprint 9)
+
+**Decision:** A vehicles screen (list + add) was built this sprint although it belongs to the Sprint 2 registry, and no backend file was touched.
+
+**Reason:** `StoreCaseRequest` requires a `vehicle_id` the caller owns, so the wizard is unreachable for a new user with no registered vehicle. Shipping the wizard without it would have produced a hero flow nobody could complete on a fresh account.
+
+**Impact:** The vehicles screen covers create and list only. Edit, delete, restore, and the whole insurance-policy side of the registry all have working endpoints but no UI yet.
+
+---
+
+### 2026-07-28 (Sprint 9)
+
+**Decision:** No route-level code splitting; the app ships as a single ~540KB (167KB gzipped) bundle, and Vite's chunk-size warning is accepted for now.
+
+**Reason:** Sprint scope was the wizard. Introducing `React.lazy` boundaries at the end of the sprint would have put 66 passing tests at risk for a gain that is real but not yet urgent.
+
+**Impact:** This works against the "low-end Android browsers" constraint in the design brief and should be the first performance task taken up. The obvious split is the landing page (which anonymous visitors load and which carries the video and all landing copy) away from the authenticated app.
+
 ## Template
 
 ### YYYY-MM-DD
