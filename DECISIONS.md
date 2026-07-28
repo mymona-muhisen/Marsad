@@ -374,6 +374,76 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** The 80% *number* is unverified — a real coverage tool could still surface untested branches/lines this manual pass missed (e.g., rarely-hit error paths inside otherwise-covered methods). Anyone with Xdebug/PCOV available should run `vendor/bin/phpunit --coverage-text` and treat any gap it finds as real; this decision only asserts that no *entire service* was found untested, not that every line is.
 
+---
+
+### 2026-07-28 (Sprint 8)
+
+**Decision:** Sprint 8 is the **web foundation**, not CLAUDE.md's build-order item 8 ("Hardening"). The hardening item was already delivered inside the Sprint 7 commit (`dd4e528`), which folded build-order items 7 and 8 together.
+
+**Reason:** The backend had reached the end of the documented build order while `apps/web` was still the Sprint 1 scaffold — 7 of the 8 screens in `05-design-brief.md` unbuilt, and none of the frontend rules in CLAUDE.md (router, TanStack Query, forms, i18n) yet in place. Confirmed the reading with the project owner before starting.
+
+**Impact:** Sprint numbering in git no longer maps 1:1 onto the CLAUDE.md build-order list from Sprint 7 onward. Build-order items 1–8 are all delivered as of this branch; subsequent sprints are frontend screens.
+
+---
+
+### 2026-07-28 (Sprint 8)
+
+**Decision:** Added two endpoints outside the original build order: `GET /api/v1/auth/me` and `POST /api/v1/auth/logout` (`SessionController` → `SessionService`, both inside the `auth:sanctum` group). Logout revokes only the calling token via `currentAccessToken()->delete()`, not all of the user's tokens.
+
+**Reason:** The OTP flow issued tokens but nothing could restore or drop a session. Without `me`, a page reload would have forced the frontend to persist the whole user object in localStorage — making role membership client-controlled cache that outlives an admin's role change, and violating CLAUDE.md's "TanStack Query for ALL server state". Without `logout`, Sanctum tokens were never revoked at all, so signing out left a live credential in storage. Per-token revocation (rather than `tokens()->delete()`) matches the user expectation that signing out of a phone does not sign you out of a shared office desktop.
+
+**Impact:** `/auth/me` returns the standard `{ data: ... }` resource envelope while `/auth/otp/verify` returns `{ user, token }` unwrapped — the frontend client has both `apiFetch` and `apiFetchResource` for this reason. Note that DEVSENSE's PHP language server flags `currentAccessToken()->delete()` as an undefined method: it reads Sanctum's loose `@return HasAbilities|null` PHPDoc, whereas larastan types it as `PersonalAccessToken`. PHPStan and Pint are both green; the call is Laravel's documented idiom.
+
+---
+
+### 2026-07-28 (Sprint 8)
+
+**Decision:** Enabled `"strict": true` in `apps/web/tsconfig.app.json`, which the Vite template scaffold had omitted.
+
+**Reason:** `strictNullChecks` in particular is what makes the API client's `User | null` session model and the nullable resource fields (`full_name`, `organization_id`, `superseded_by`) mean anything. Turning it on while `apps/web` was still one placeholder component cost nothing; turning it on after the eight screens exist would be a migration.
+
+**Impact:** All new frontend code is written strict-clean and `npm run typecheck` passes. Any future code that ignores nullability now fails CI instead of failing at runtime.
+
+---
+
+### 2026-07-28 (Sprint 8)
+
+**Decision:** `RequireAuth` distinguishes four states — `loading`, `authenticated`, `anonymous`, `error` — and only redirects to `/login` on `anonymous`. A failed `/auth/me` caused by a dropped connection renders a retry instead.
+
+**Reason:** The naive two-state guard ("no user ⇒ redirect to login") signs a user out every time the network blips, which on the patchy mobile connections this platform targets means losing your place mid-task. A 401 is the only signal that the session is actually gone, and the API client already handles that case by clearing the token — which moves the guard to `anonymous` on its own.
+
+**Impact:** Any future protected route inherits this behaviour for free. The distinction is covered by two tests in `src/routes/guards.test.tsx` (network error keeps the user in place; 401 drops the session).
+
+---
+
+### 2026-07-28 (Sprint 8)
+
+**Decision:** The authenticated section list lives in one registry (`src/features/home/sections.ts`) that both the router and the home screen consume. The router generates a `RequireRole`-wrapped route per entry; the home screen lists the entries matching the signed-in user's roles.
+
+**Reason:** The failure mode with two hand-maintained lists is a section that is linked but unguarded (or guarded but unreachable). Deriving both from one array makes that class of bug unrepresentable rather than merely tested-for.
+
+**Impact:** Adding a console in a later sprint means adding one registry entry and swapping `PlaceholderSection` for the real component. The `roles` on each entry must keep mirroring the matching `role:` middleware in `routes/api.php` — the frontend guard is navigational only, the API stays the enforcement point.
+
+---
+
+### 2026-07-28 (Sprint 8)
+
+**Decision:** All landing-page copy moved from `content.ts` into the `ar`/`en` lang files under `landing.*`; `content.ts` now holds only non-text structure (asset paths, target routes, and the icon that accompanies each item, matched to the lang-file arrays by index).
+
+**Reason:** CLAUDE.md requires Arabic user-facing strings to live in lang files. Matching icons to translated items by array index (rather than embedding icon names in the JSON) keeps the lang files pure content, so they stay translatable without a developer.
+
+**Impact:** Adding a landing item means editing both the lang files and the matching icon array in `content.ts`; a missing icon renders the card without one rather than crashing. Dev in this environment used the Vite proxy (`/api` → `127.0.0.1:8000`) rather than publishing a CORS config, so no `config/cors.php` exists — a deployed frontend on a different origin will need one.
+
+---
+
+### 2026-07-28 (Sprint 8)
+
+**Decision:** The new `tests/Feature/Auth/SessionTest.php` was **not executed**; the frontend suite (32 tests) plus Pint and PHPStan on the API were.
+
+**Reason:** `phpunit.xml` points the test suite at MySQL (`masar_testing`), and the local MySQL server was not running during this sprint (`SQLSTATE[HY000] [2002] ... target machine actively refused it`). Running the suite against SQLite instead would have been misleading, since the migrations use raw MySQL `CHECK` statements (CLAUDE.md rule 6).
+
+**Impact:** `SessionTest` is unverified until someone starts MySQL and runs `composer test`. The three cases it covers (me returns roles, me rejects anonymous callers, logout revokes only the calling token) are the ones to watch if the endpoints misbehave.
+
 ## Template
 
 ### YYYY-MM-DD

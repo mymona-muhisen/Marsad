@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\Adjudication\AdjudicationController;
 use App\Http\Controllers\Api\V1\Adjudication\ObjectionController;
 use App\Http\Controllers\Api\V1\Auth\OtpController;
+use App\Http\Controllers\Api\V1\Auth\SessionController;
 use App\Http\Controllers\Api\V1\Authority\AnalyticsController as AuthorityAnalyticsController;
 use App\Http\Controllers\Api\V1\CaseController;
 use App\Http\Controllers\Api\V1\CaseJoinController;
@@ -39,6 +40,10 @@ Route::prefix('v1')->group(function () {
         ->middleware(['signed', 'throttle:60,1']);
 
     Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+        // Session restore on reload + single-device sign-out.
+        Route::get('auth/me', [SessionController::class, 'me']);
+        Route::post('auth/logout', [SessionController::class, 'logout']);
+
         Route::apiResource('vehicles', VehicleController::class);
         Route::post('vehicles/{vehicle}/restore', [VehicleController::class, 'restore']);
         Route::post('vehicles/{vehicle}/policies', [PolicyController::class, 'store']);
