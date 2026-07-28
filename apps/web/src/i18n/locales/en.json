@@ -121,6 +121,131 @@
     "super_admin": "Technical owner"
   },
 
+  "caseStatus": {
+    "draft": "Draft",
+    "submitted": "Reported",
+    "under_review": "Under review",
+    "awaiting_counterparty": "Awaiting the other party",
+    "evidence_complete": "Evidence complete",
+    "adjudication": "Liability under review",
+    "decision_issued": "Decision issued",
+    "objection_window": "Objection window",
+    "final": "Final",
+    "closed": "Closed",
+    "cancelled": "Cancelled",
+    "escalated": "Escalated"
+  },
+
+  "claimStatus": {
+    "opened": "Open",
+    "info_requested": "Information requested",
+    "assessing": "Being assessed",
+    "approved": "Approved",
+    "partially_approved": "Partially approved",
+    "rejected": "Rejected",
+    "settled": "Settled",
+    "closed": "Closed"
+  },
+
+  "caseTrack": {
+    "fast_track": "Fast track",
+    "dispatch_required": "Surveyor dispatch",
+    "police_required": "Referred to the authority"
+  },
+
+  "cases": {
+    "title": "My cases",
+    "subtitle": "Every accident you reported or were a party to.",
+    "empty": "No cases yet.",
+    "emptyCta": "Report an accident",
+    "occurredAt": "Occurred",
+    "open": "View details",
+
+    "detail": {
+      "caseNo": "Case number",
+      "track": "Track",
+      "occurredAt": "Time of accident",
+      "location": "Location",
+      "injuries": "Injuries",
+      "notFound": "This case does not exist, or you are not allowed to view it.",
+      "coordinates": "Coordinates"
+    },
+
+    "timeline": {
+      "title": "Case progress",
+      "reported": "Accident reported",
+      "counterpartyJoined": "The other party joined and added their account",
+      "counterpartyPending": "Waiting for the other party to join",
+      "decision": "Liability decision issued",
+      "objection": "Objection filed",
+      "objectionResolved": "Objection resolved",
+      "report": "Official report issued",
+      "claim": "Claim opened with the insurer"
+    },
+
+    "evidence": {
+      "title": "Evidence",
+      "empty": "No evidence uploaded.",
+      "count": "{{count}} files",
+      "hash": "File hash",
+      "loadFailed": "Could not load the image.",
+      "types": {
+        "photo": "Photo",
+        "voice": "Voice note",
+        "sketch": "Sketch",
+        "document": "Document"
+      },
+      "superseded": "Superseded by a newer version"
+    },
+
+    "decision": {
+      "title": "Liability decision",
+      "none": "No liability decision has been issued yet.",
+      "rule": "The rule it cites",
+      "justification": "Reviewer's reasoning",
+      "overridden": "The automatic proposal was adjusted by the reviewer",
+      "shares": "Liability split",
+      "yourShare": "Your share",
+      "otherParty": "Other party",
+      "decidedAt": "Decision date"
+    },
+
+    "objection": {
+      "title": "Object to the decision",
+      "windowOpen": "You can object within",
+      "windowClosed": "The objection window has closed.",
+      "remainingHours": "{{hours}}h {{minutes}}m",
+      "remainingMinutes": "{{minutes}} minutes",
+      "already": "You have already objected to this decision.",
+      "yourReason": "Your reason",
+      "resolution": "Appeal panel's decision",
+      "reasonLabel": "Reason for objecting",
+      "reasonPlaceholder": "Explain why you disagree with the liability split, and what you believe was overlooked.",
+      "submit": "File an objection",
+      "submitting": "Sending…",
+      "success": "Your objection has been recorded and will go to the review panel.",
+      "reasonRequired": "Write your reason for objecting.",
+      "status": {
+        "open": "Under review",
+        "upheld": "Objection upheld",
+        "rejected": "Objection rejected"
+      }
+    },
+
+    "report": {
+      "title": "Official report",
+      "reportNo": "Report number",
+      "issuedAt": "Issued on",
+      "verify": "Verify this report"
+    },
+
+    "claim": {
+      "title": "Claims",
+      "openedAt": "Opened",
+      "sla": "Binding response deadline"
+    }
+  },
+
   "vehicles": {
     "title": "My vehicles",
     "subtitle": "Add your vehicle before reporting an accident — a report is always tied to a vehicle registered in your name.",

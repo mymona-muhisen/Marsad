@@ -81,6 +81,66 @@ export type CaseStatus =
 /** Mirrors `App\Enums\CaseTrack` — the triage engine's verdict. */
 export type CaseTrack = 'fast_track' | 'dispatch_required' | 'police_required'
 
+/** Mirrors `App\Enums\ClaimStatus`. */
+export type ClaimStatus =
+  | 'opened'
+  | 'info_requested'
+  | 'assessing'
+  | 'approved'
+  | 'partially_approved'
+  | 'rejected'
+  | 'settled'
+  | 'closed'
+
+/** Mirrors `App\Http\Resources\ObjectionResource`. */
+export type Objection = {
+  id: number
+  decision_id: number
+  party_id: number
+  reason: string
+  status: 'open' | 'upheld' | 'rejected'
+  resolution_note: string | null
+  resolved_at: string | null
+}
+
+/** Mirrors `App\Http\Resources\FaultDecisionResource`. */
+export type FaultDecision = {
+  id: number
+  case_id: number
+  rule_id: number | null
+  scenario_code?: string | null
+  /** The cited rule in plain Arabic (FR-F2). */
+  rule_description_ar?: string | null
+  status: string
+  was_overridden: boolean
+  justification: string | null
+  decided_at: string
+  objection_window_hours: number
+  objection_deadline: string
+  /**
+   * Server-computed. The countdown ticks down from this rather than diffing
+   * the deadline against the device clock, which may be wrong.
+   */
+  objection_seconds_remaining: number
+  allocations?: { party_id: number; percentage: number }[]
+  objections?: Objection[]
+}
+
+export type CaseReportSummary = {
+  report_no: string
+  status: 'active' | 'superseded'
+  issued_at: string
+  qr_token: string
+}
+
+export type CaseClaimSummary = {
+  id: number
+  claimant_party_id: number
+  status: ClaimStatus
+  sla_due_at: string
+  opened_at: string
+}
+
 /** Mirrors `App\Http\Resources\EvidenceItemResource`. */
 export type EvidenceItem = {
   id: number
@@ -124,6 +184,10 @@ export type AccidentCase = {
   injury_flag: boolean
   police_report_ref: string | null
   one_sided_flag: boolean
+  location_description?: string | null
   parties?: CaseParty[]
+  fault_decision?: FaultDecision | null
+  reports?: CaseReportSummary[]
+  claims?: CaseClaimSummary[]
   created_at: string
 }

@@ -13,6 +13,7 @@ use App\Models\AccidentCase;
 use App\Models\CaseParty;
 use App\Models\User;
 use App\Models\Vehicle;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -174,6 +175,19 @@ class CaseService
         }
 
         return $case->refresh();
+    }
+
+    /**
+     * Cases the user is a party to — the same rule AccidentCasePolicy::view
+     * enforces on a single case, applied as a list filter.
+     *
+     * @return Builder<AccidentCase>
+     */
+    public function forUser(User $user): Builder
+    {
+        return AccidentCase::query()
+            ->whereHas('parties', fn (Builder $query) => $query->where('user_id', $user->id))
+            ->latest('occurred_at');
     }
 
     private function activePolicyId(Vehicle $vehicle): ?int

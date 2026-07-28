@@ -22,9 +22,12 @@ use Illuminate\Validation\ValidationException;
  */
 class ObjectionService
 {
-    private const WINDOW_HOURS = 72;
-
     public function __construct(private readonly CaseLifecycleService $lifecycle) {}
+
+    private function windowHours(): int
+    {
+        return (int) config('fault.objection_window_hours');
+    }
 
     public function submit(FaultDecision $decision, User $user, string $reason): Objection
     {
@@ -36,9 +39,11 @@ class ObjectionService
             ]);
         }
 
-        if ($decision->decided_at->addHours(self::WINDOW_HOURS)->isPast()) {
+        $windowHours = $this->windowHours();
+
+        if ($decision->decided_at->addHours($windowHours)->isPast()) {
             throw ValidationException::withMessages([
-                'reason' => ['انتهت مهلة الاعتراض (72 ساعة).'],
+                'reason' => ["انتهت مهلة الاعتراض ({$windowHours} ساعة)."],
             ]);
         }
 

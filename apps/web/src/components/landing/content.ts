@@ -8,6 +8,7 @@
  */
 
 export const brand = {
+  
   logoSrc: '/logo-mark.png',
 } as const
 
@@ -16,7 +17,7 @@ export const brand = {
  * the text — so the stage is hidden from assistive tech.
  */
 export const heroVideo = {
-  src: '/Two_cars_colliding_in_accident_202607281114.mp4',
+  src: '/accdient.mp4',
 } as const
 
 /**

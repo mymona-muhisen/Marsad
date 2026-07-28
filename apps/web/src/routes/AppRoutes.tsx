@@ -4,6 +4,8 @@ import { Route, Routes } from 'react-router'
 import { AppShell } from '@/components/layout/AppShell'
 import { LandingPage } from '@/components/landing/LandingPage'
 import { LoginPage } from '@/features/auth/LoginPage'
+import { CaseDetailPage } from '@/features/cases/CaseDetailPage'
+import { CasesPage } from '@/features/cases/CasesPage'
 import { HomePage } from '@/features/home/HomePage'
 import { PlaceholderSection } from '@/features/home/PlaceholderSection'
 import { SECTIONS } from '@/features/home/sections'
@@ -17,6 +19,7 @@ import { NotFoundPage } from './NotFoundPage'
 /** Sections with a real screen; everything else renders the placeholder. */
 const SECTION_SCREENS: Record<string, ReactElement> = {
   myVehicles: <VehiclesPage />,
+  myCases: <CasesPage />,
 }
 
 /**
@@ -54,6 +57,11 @@ export function AppRoutes() {
                 />
               </Route>
             ))}
+
+            {/* Case detail sits under the same citizen guard as the list. */}
+            <Route element={<RequireRole allowed={['citizen']} />}>
+              <Route path="/app/cases/:caseNo" element={<CaseDetailPage />} />
+            </Route>
           </Route>
 
           {/* UC-01. Anonymous visitors clicking the landing CTA land on login

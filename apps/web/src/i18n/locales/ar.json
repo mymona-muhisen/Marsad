@@ -121,6 +121,131 @@
     "super_admin": "مدير تقني"
   },
 
+  "caseStatus": {
+    "draft": "مسودّة",
+    "submitted": "تم التبليغ",
+    "under_review": "قيد المراجعة",
+    "awaiting_counterparty": "بانتظار الطرف الآخر",
+    "evidence_complete": "اكتملت الأدلة",
+    "adjudication": "قيد تحديد المسؤولية",
+    "decision_issued": "صدر القرار",
+    "objection_window": "مهلة الاعتراض",
+    "final": "نهائي",
+    "closed": "مغلقة",
+    "cancelled": "ملغاة",
+    "escalated": "مُصعَّدة"
+  },
+
+  "claimStatus": {
+    "opened": "مفتوحة",
+    "info_requested": "بانتظار معلومات",
+    "assessing": "قيد التقدير",
+    "approved": "موافَق عليها",
+    "partially_approved": "موافقة جزئية",
+    "rejected": "مرفوضة",
+    "settled": "تمّت التسوية",
+    "closed": "مغلقة"
+  },
+
+  "caseTrack": {
+    "fast_track": "مسار سريع",
+    "dispatch_required": "إيفاد خبير",
+    "police_required": "إحالة إلى الجهة المختصة"
+  },
+
+  "cases": {
+    "title": "قضاياي",
+    "subtitle": "كل حادث بلّغت عنه أو كنت طرفاً فيه.",
+    "empty": "لا توجد قضايا بعد.",
+    "emptyCta": "بلّغ عن حادث",
+    "occurredAt": "وقع في",
+    "open": "عرض التفاصيل",
+
+    "detail": {
+      "caseNo": "رقم القضية",
+      "track": "المسار",
+      "occurredAt": "وقت الحادث",
+      "location": "الموقع",
+      "injuries": "إصابات",
+      "notFound": "القضية غير موجودة أو لا تملك صلاحية عرضها.",
+      "coordinates": "الإحداثيات"
+    },
+
+    "timeline": {
+      "title": "مسار القضية",
+      "reported": "تم التبليغ عن الحادث",
+      "counterpartyJoined": "انضمّ الطرف الآخر وأضاف روايته",
+      "counterpartyPending": "بانتظار انضمام الطرف الآخر",
+      "decision": "صدر قرار المسؤولية",
+      "objection": "قُدّم اعتراض",
+      "objectionResolved": "تمّ البتّ في الاعتراض",
+      "report": "صدر التقرير الرسمي",
+      "claim": "فُتحت المطالبة لدى شركة التأمين"
+    },
+
+    "evidence": {
+      "title": "الأدلة",
+      "empty": "لا توجد أدلة مرفوعة.",
+      "count": "{{count}} ملف",
+      "hash": "بصمة الملف",
+      "loadFailed": "تعذّر تحميل الصورة.",
+      "types": {
+        "photo": "صورة",
+        "voice": "تسجيل صوتي",
+        "sketch": "مخطط",
+        "document": "مستند"
+      },
+      "superseded": "استُبدل بنسخة أحدث"
+    },
+
+    "decision": {
+      "title": "قرار المسؤولية",
+      "none": "لم يصدر قرار المسؤولية بعد.",
+      "rule": "القاعدة المستنَد إليها",
+      "justification": "تعليل المراجع",
+      "overridden": "عُدّل الاقتراح الآلي من قبل المراجع",
+      "shares": "نسب المسؤولية",
+      "yourShare": "نسبتك",
+      "otherParty": "الطرف الآخر",
+      "decidedAt": "تاريخ القرار"
+    },
+
+    "objection": {
+      "title": "الاعتراض على القرار",
+      "windowOpen": "يمكنك الاعتراض خلال",
+      "windowClosed": "انتهت مهلة الاعتراض.",
+      "remainingHours": "{{hours}} ساعة و {{minutes}} دقيقة",
+      "remainingMinutes": "{{minutes}} دقيقة",
+      "already": "قدّمت اعتراضاً على هذا القرار.",
+      "yourReason": "سبب اعتراضك",
+      "resolution": "قرار لجنة الاعتراضات",
+      "reasonLabel": "سبب الاعتراض",
+      "reasonPlaceholder": "اشرح سبب اعتراضك على نسب المسؤولية، واذكر ما تعتقد أنه أُغفل.",
+      "submit": "تقديم اعتراض",
+      "submitting": "جارٍ الإرسال…",
+      "success": "تم تسجيل اعتراضك وسيُحال إلى لجنة المراجعة.",
+      "reasonRequired": "اكتب سبب اعتراضك.",
+      "status": {
+        "open": "قيد النظر",
+        "upheld": "قُبل الاعتراض",
+        "rejected": "رُفض الاعتراض"
+      }
+    },
+
+    "report": {
+      "title": "التقرير الرسمي",
+      "reportNo": "رقم التقرير",
+      "issuedAt": "تاريخ الإصدار",
+      "verify": "التحقق من التقرير"
+    },
+
+    "claim": {
+      "title": "المطالبات",
+      "openedAt": "فُتحت في",
+      "sla": "الموعد الملزم للردّ"
+    }
+  },
+
   "vehicles": {
     "title": "مركباتي",
     "subtitle": "أضف مركبتك قبل التبليغ عن حادث — التقرير يُربط بمركبة مسجّلة باسمك.",
