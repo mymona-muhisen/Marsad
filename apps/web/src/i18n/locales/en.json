@@ -1,0 +1,243 @@
+{
+  "common": {
+    "appName": "Masar",
+    "appLatin": "Masar",
+    "tagline": "We record the accident — to reach the truth",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "back": "Back",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "change": "Change",
+    "switchLanguage": "العربية",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The link you opened is invalid or no longer available.",
+    "goHome": "Back to home"
+  },
+
+  "errors": {
+    "network": "Could not reach the server. Check your connection and try again.",
+    "unexpected": "Something went wrong. Please try again.",
+    "forbidden": "You do not have permission to view this page.",
+    "rateLimited": "Too many attempts. Try again in {{seconds}} seconds.",
+    "rateLimitedNoDelay": "Too many attempts. Please try again shortly."
+  },
+
+  "nav": {
+    "how": "How it works",
+    "audiences": "Who it's for",
+    "trust": "Trust",
+    "verify": "Verify a report",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "report": "Report an accident"
+  },
+
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Enter your phone number and we'll text you a verification code.",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "09XXXXXXXX",
+    "phoneHint": "A Syrian number starting with 09, 10 digits total.",
+    "phoneInvalid": "Enter a valid Syrian number starting with 09 (10 digits).",
+    "fullNameLabel": "Full name",
+    "fullNamePlaceholder": "Your full name",
+    "fullNameHint": "Required the first time you sign in with this number.",
+    "fullNameRequired": "Full name is required.",
+    "fullNameTooLong": "Name is too long (120 characters maximum).",
+    "sendCode": "Send verification code",
+    "sending": "Sending…",
+    "codeTitle": "Enter your code",
+    "codeSentTo": "We sent a 6-digit code to {{phone}}",
+    "codeLabel": "Verification code",
+    "codeInvalid": "The code is 6 digits.",
+    "verify": "Verify and sign in",
+    "verifying": "Verifying…",
+    "changePhone": "Change number",
+    "resend": "Resend code",
+    "resendIn": "Resend in {{seconds}}s",
+    "devHint": "In development the code is written to the server log instead of being sent by SMS."
+  },
+
+  "verify": {
+    "title": "Verify a report",
+    "subtitle": "Enter the verification token printed on the report, or open the QR link directly.",
+    "tokenLabel": "Verification token",
+    "tokenPlaceholder": "The token printed under the QR code",
+    "tokenRequired": "Enter the verification token.",
+    "submit": "Verify",
+    "checking": "Checking…",
+    "validTitle": "Valid report, issued by the platform",
+    "supersededTitle": "This report has been superseded by a newer one",
+    "notFoundTitle": "No report matches this token",
+    "notFoundBody": "Check the token, or rescan the QR code on the original report.",
+    "reportNo": "Report number",
+    "issuedAt": "Issued on",
+    "supersededBy": "Superseded by report",
+    "privacyNote": "For privacy, this page shows only whether the report is valid — no party names, accident details, or amounts."
+  },
+
+  "home": {
+    "greeting": "Hello, {{name}}",
+    "greetingAnonymous": "Welcome",
+    "rolesLabel": "Your roles",
+    "sectionsLabel": "Your sections",
+    "empty": "No sections are available for your current role.",
+    "soon": "Coming soon"
+  },
+
+  "sections": {
+    "myCases": "My cases",
+    "myVehicles": "My vehicles & policies",
+    "myClaims": "My claims",
+    "dispatches": "My field assignments",
+    "adjudicationQueue": "Adjudication queue",
+    "objections": "Objections",
+    "insurerClaims": "Company claims",
+    "insurerPolicies": "Policy verification",
+    "estimates": "Damage estimates",
+    "slaReport": "SLA compliance",
+    "fraudFlags": "Fraud flags",
+    "heatmap": "Heatmap",
+    "blackSpots": "Black spots",
+    "administration": "Platform administration"
+  },
+
+  "roles": {
+    "citizen": "Citizen",
+    "surveyor": "Field surveyor",
+    "adjudicator": "Adjudicator",
+    "senior_adjudicator": "Senior adjudicator",
+    "insurer_agent": "Insurer agent",
+    "insurer_admin": "Insurer admin",
+    "assessor": "Damage assessor",
+    "workshop": "Repair workshop",
+    "regulator": "Regulator",
+    "authority": "Traffic authority",
+    "call_center": "Call centre",
+    "admin": "Platform admin",
+    "super_admin": "Technical owner"
+  },
+
+  "landing": {
+    "hero": {
+      "eyebrow": "A national platform for traffic accidents and motor insurance",
+      "title": "From the accident scene",
+      "titleAccent": "to a fair settlement",
+      "subtitle": "Document the accident yourself in minutes, then follow the liability decision and your insurance claim step by step — fully transparent, with no waiting at the roadside.",
+      "primaryCta": "Report an accident",
+      "secondaryCta": "See how it works",
+      "scrollHint": "Scroll down"
+    },
+    "stats": {
+      "items": [
+        { "value": "5", "unit": "minutes", "label": "Target time to report from your phone" },
+        { "value": "48", "unit": "hours", "label": "Report issued on the fast track" },
+        { "value": "72", "unit": "hours", "label": "Window to object to a liability decision" },
+        { "value": "12", "unit": "states", "label": "Documented lifecycle for every case" }
+      ]
+    },
+    "problem": {
+      "eyebrow": "The problem",
+      "title": "A minor accident, a long road",
+      "body": "Today an accident starts with waiting at the roadside, continues with paperwork carried by hand between the parties, and ends in an ad-hoc liability call and a claim with no clear date.",
+      "points": [
+        "Traffic backs up while everyone waits for an official to reach the scene",
+        "Liability is judged case by case with no published rule",
+        "Paper evidence and scattered photos are easy to lose or swap",
+        "Insurance claims with no binding deadlines and no stated reason for rejection"
+      ]
+    },
+    "steps": {
+      "eyebrow": "How it works",
+      "title": "Five steps, from the road to settlement",
+      "items": [
+        {
+          "title": "Report and document",
+          "body": "A guided wizard walks you through it: drop a pin on the map, take photos against on-screen guide frames, and record a voice statement in Arabic."
+        },
+        {
+          "title": "The other party joins",
+          "body": "The second driver receives a signed SMS link that attaches their account to the same case — one case, two perspectives."
+        },
+        {
+          "title": "Triage and inspection",
+          "body": "A rules-based triage engine decides: remote fast track, dispatch a field surveyor, or refer to the competent authority."
+        },
+        {
+          "title": "Liability decision",
+          "body": "A codified liability matrix proposes the split, and a qualified reviewer confirms it with written reasoning — with a 72-hour right to object."
+        },
+        {
+          "title": "Report and claim",
+          "body": "A digitally signed official report with a QR code, which automatically opens your claim with the insurer and tracks every step."
+        }
+      ]
+    },
+    "audiences": {
+      "eyebrow": "Who it's for",
+      "title": "One platform for every party to an accident",
+      "items": [
+        {
+          "title": "Drivers and citizens",
+          "body": "Self-reporting, case and claim tracking, and objections — all in one place."
+        },
+        {
+          "title": "Field surveyors",
+          "body": "Zone-based assignments and evidence upload that keeps working when the network drops."
+        },
+        {
+          "title": "Adjudicators and the appeals panel",
+          "body": "A structured review queue, statements compared side by side, and a rule-backed automatic proposal."
+        },
+        {
+          "title": "Insurance companies",
+          "body": "Standardised reports, consistent damage estimates, and decisions with mandatory reason codes."
+        },
+        {
+          "title": "Regulators and traffic authorities",
+          "body": "SLA compliance dashboards, accident heatmaps, and fraud indicators."
+        }
+      ]
+    },
+    "trust": {
+      "eyebrow": "Trust",
+      "title": "Trust is built in software, not assumed",
+      "body": "We don't depend on complete registries or ready-made government integrations — the proof is built inside the platform itself.",
+      "items": [
+        {
+          "title": "Tamper-evident evidence",
+          "body": "Every file is hashed with SHA-256 the moment it is uploaded, and is never deleted or edited; corrections add a later version while the original stays visible."
+        },
+        {
+          "title": "Public report verification",
+          "body": "Scan the QR code on any report to confirm it is genuine and current — no sign-in, and no party data exposed."
+        },
+        {
+          "title": "Automatic fraud detection",
+          "body": "The same image hash appearing across cases raises a flag immediately, alongside repeat-claimant and impossible-geometry signals."
+        },
+        {
+          "title": "Complete audit trail",
+          "body": "Every decision and every permission change is recorded with who did it, when, and the values before and after."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Your accident deserves a clear path",
+      "body": "Start a report now, or check whether a report in your hands is genuine.",
+      "primary": "Report an accident",
+      "secondary": "Verify a report"
+    },
+    "footer": {
+      "platform": "Platform",
+      "platformLinks": ["How it works", "Trust", "FAQ"],
+      "services": "Services",
+      "servicesLinks": ["Report an accident", "Track a claim", "Verify a report"],
+      "partners": "Partners",
+      "partnersLinks": ["Insurance companies", "Accredited workshops", "Regulators"],
+      "legal": "All rights reserved",
+      "note": "Graduation project — preview build"
+    }
+  }
+}
