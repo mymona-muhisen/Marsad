@@ -524,6 +524,36 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** Any future test that needs a *second* request to re-authenticate (token revocation, role changes taking effect, impersonation) must forget the guards first, or it will silently pass against stale state. This is exactly the failure the Sprint 8 entry above warned was possible while MySQL was unavailable — the full suite is now green at 124 tests / 575 assertions.
 
+---
+
+### 2026-07-29 (Sprint 10)
+
+**Decision:** Added `GET /api/v1/cases`, scoped to cases the caller is a party to, and enriched `CaseResource` with the fault decision (including the cited rule's `description_ar`), the issued reports, and the opened claims — all as `whenLoaded` fields.
+
+**Reason:** The citizen case view needs a list, and no list endpoint existed: Sprints 3–7 built `POST /cases` and `GET /cases/{case}` but never an index, so "my cases" was unreachable. The index filters by party membership, which is the same rule `AccidentCasePolicy::view` enforces on a single case — a user cannot see a case they are not part of, so no extra policy call is needed. The resource additions are `whenLoaded`, so the create and join responses are byte-for-byte unchanged.
+
+**Impact:** `GET /cases/{case}` now eager-loads six relations in one round trip. `preventLazyLoading` (Sprint 7) makes any missed relation fail loudly in dev rather than silently N+1, so adding a field to the citizen view means adding the matching `with()` in `CaseController::show`.
+
+---
+
+### 2026-07-29 (Sprint 10)
+
+**Decision:** The objection countdown is driven by a server-computed `objection_seconds_remaining`, not by the client diffing `objection_deadline` against its own clock. `useCountdown` derives its deadline from the device clock *plus* that server figure, so only elapsed time is measured locally.
+
+**Reason:** A device with the wrong date would otherwise show a citizen the wrong time left to object to a liability decision — a legally meaningful 72-hour deadline (FR-F3) on exactly the low-end Android devices this platform targets. Measuring only elapsed time makes absolute clock skew irrelevant. The server re-checks the window on submit regardless, so a stale client can never actually beat the deadline; the countdown is about not misleading the reader.
+
+**Impact:** `objection_deadline` is still sent for display, but nothing should compute remaining time from it. The 72 itself now lives in `config/fault.php` — it was previously duplicated as a private const in both `ObjectionService` and `ObjectionWindowService`, and the resource became a third consumer that could have drifted from them.
+
+---
+
+### 2026-07-29 (Sprint 10)
+
+**Decision:** The case timeline is derived from timestamps the API already carries (case `created_at`, counterparty `joined_at`, decision `decided_at`, objection `resolved_at`, report `issued_at`, claim `opened_at`) rather than from a per-transition history table. No `case_events` table was added.
+
+**Reason:** Claims have `claim_events`; cases do not — doc 04 never specified one. Every entry rendered is therefore a recorded fact with a source, not an inference from the current status. Fabricating intermediate transition times from the state machine would have put invented timestamps in front of a citizen on a page whose whole purpose is transparency.
+
+**Impact:** The timeline cannot show transitions that leave no timestamp of their own (`under_review` → `adjudication`, for instance), and it cannot show *who* made a transition. A `case_events` table mirroring `claim_events` is the fuller answer if the appeals process later needs a defensible per-transition record; the audit log (Sprint 7) covers decisions and claims but is not citizen-facing.
+
 ## Template
 
 ### YYYY-MM-DD

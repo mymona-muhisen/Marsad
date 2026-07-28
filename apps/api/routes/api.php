@@ -60,6 +60,7 @@ Route::prefix('v1')->group(function () {
             Route::post('claims/{claim}/settlement', [SettlementController::class, 'store']);
         });
 
+        Route::get('cases', [CaseController::class, 'index']);
         Route::post('cases', [CaseController::class, 'store']);
         Route::post('cases/join/{token}', [CaseJoinController::class, 'join']);
         Route::get('cases/{case}', [CaseController::class, 'show']);

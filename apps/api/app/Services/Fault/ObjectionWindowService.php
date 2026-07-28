@@ -9,17 +9,16 @@ use App\Services\Cases\CaseLifecycleService;
 
 class ObjectionWindowService
 {
-    private const WINDOW_HOURS = 72;
-
     public function __construct(private readonly CaseLifecycleService $lifecycle) {}
 
     public function closeExpiredWindows(): int
     {
         $closed = 0;
+        $windowHours = (int) config('fault.objection_window_hours');
 
         $decisions = FaultDecision::query()
             ->where('status', FaultDecisionStatus::Confirmed->value)
-            ->where('decided_at', '<=', now()->subHours(self::WINDOW_HOURS))
+            ->where('decided_at', '<=', now()->subHours($windowHours))
             ->with('case')
             ->get();
 
