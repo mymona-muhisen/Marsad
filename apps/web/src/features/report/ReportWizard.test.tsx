@@ -71,7 +71,7 @@ describe('ReportWizard', () => {
     expect(await screen.findByText('أين وقع الحادث؟')).toBeInTheDocument()
   })
 
-  it('blocks the location step until coordinates are in range', async () => {
+  it('blocks the location step until a place is chosen', async () => {
     const user = userEvent.setup()
     saveDraft({
       ...EMPTY_DRAFT,
@@ -84,19 +84,43 @@ describe('ReportWizard', () => {
     renderWithProviders(<AppRoutes />, { route: '/report/new' })
 
     await user.click(await screen.findByRole('button', { name: /التالي/ }))
-    expect(await screen.findByText('حدّد موقع الحادث.')).toBeInTheDocument()
+    expect(
+      await screen.findByText(/حدّد موقع الحادث/),
+    ).toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText('خط العرض'), {
-      target: { value: '120' },
-    })
-    fireEvent.change(screen.getByLabelText('خط الطول'), {
-      target: { value: '36.2765' },
-    })
+    // Picking a governorate alone is city-scale — the written address is what
+    // makes it usable, so the step must not pass yet.
+    await user.selectOptions(screen.getByLabelText('المحافظة'), 'damascus')
     await user.click(screen.getByRole('button', { name: /التالي/ }))
 
     expect(
-      await screen.findByText('خط العرض يجب أن يكون بين -90 و 90.'),
+      await screen.findByText(/اكتب وصف مكان الحادث/),
     ).toBeInTheDocument()
+  })
+
+  it('lets the reporter name a place instead of typing coordinates', async () => {
+    const user = userEvent.setup()
+    saveDraft({
+      ...EMPTY_DRAFT,
+      vehicleId: VEHICLE.id,
+      occurredAt: '2026-07-28T10:00',
+      injuryFlag: false,
+      step: 1,
+    })
+
+    renderWithProviders(<AppRoutes />, { route: '/report/new' })
+
+    await user.selectOptions(
+      await screen.findByLabelText('المحافظة'),
+      'damascus',
+    )
+    fireEvent.change(screen.getByLabelText('وصف مكان الحادث'), {
+      target: { value: 'أوتوستراد المزة، مقابل مشفى الشامي' },
+    })
+    await user.click(screen.getByRole('button', { name: /التالي/ }))
+
+    // Advanced past the location step onto the photos step.
+    expect(await screen.findByText('صوّر مكان الحادث')).toBeInTheDocument()
   })
 
   it('carries the whole report through to a submitted case', async () => {
@@ -139,12 +163,14 @@ describe('ReportWizard', () => {
     await user.click(screen.getByRole('radio', { name: /أضرار مادية فقط/ }))
     await user.click(screen.getByRole('button', { name: /التالي/ }))
 
-    // Step 2 — location typed by hand (no geolocation in jsdom).
-    fireEvent.change(await screen.findByLabelText('خط العرض'), {
-      target: { value: '33.5138' },
-    })
-    fireEvent.change(screen.getByLabelText('خط الطول'), {
-      target: { value: '36.2765' },
+    // Step 2 — named place, the path a driver actually uses (jsdom has no
+    // geolocation, which is also the real no-GPS case).
+    await user.selectOptions(
+      await screen.findByLabelText('المحافظة'),
+      'damascus',
+    )
+    fireEvent.change(screen.getByLabelText('وصف مكان الحادث'), {
+      target: { value: 'أوتوستراد المزة، مقابل مشفى الشامي' },
     })
     await user.click(screen.getByRole('button', { name: /التالي/ }))
 
@@ -180,6 +206,14 @@ describe('ReportWizard', () => {
     expect(form.get('injury_flag')).toBe('0')
     expect(form.get('counterparty_phone')).toBe('0955555555')
     expect(form.getAll('photos[]')).toHaveLength(4)
+    // The governorate fills the coordinates the analytics need and the region
+    // column they group on, while the written address carries the precision.
+    expect(form.get('lat')).toBe('33.5138')
+    expect(form.get('region')).toBe('دمشق')
+    expect(form.get('location_verified')).toBe('0')
+    expect(form.get('location_description')).toBe(
+      'أوتوستراد المزة، مقابل مشفى الشامي',
+    )
 
     // A submitted report must not leave a draft behind to resume.
     await waitFor(() =>
@@ -203,6 +237,8 @@ describe('ReportWizard', () => {
       injuryFlag: false,
       lat: 33.5138,
       lng: 36.2765,
+      regionCode: 'damascus',
+      locationDescription: 'أوتوستراد المزة، مقابل مشفى الشامي',
       counterpartyPhone: '0955555555',
       statement: 'اصطدمت بي المركبة من الخلف.',
       step: 2,

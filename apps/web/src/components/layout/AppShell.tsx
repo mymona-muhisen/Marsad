@@ -1,4 +1,4 @@
-import { Languages, LogOut } from 'lucide-react'
+import { Languages, LogOut, Siren } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link, Outlet, useNavigate } from 'react-router'
 
@@ -24,6 +24,15 @@ export function AppShell() {
           <Link to="/app" className="flex items-center gap-2.5">
             <img src="/logo-mark.png" alt="" className="size-8 object-contain" />
             <span className="font-bold tracking-tight">{t('common.appName')}</span>
+          </Link>
+
+          {/* Always one tap away — reporting is why someone opens this app. */}
+          <Link
+            to="/report/new"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
+          >
+            <Siren className="size-4" aria-hidden="true" />
+            <span className="hidden sm:inline">{t('nav.report')}</span>
           </Link>
 
           <div className="ms-auto flex items-center gap-1 sm:gap-2">

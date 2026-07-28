@@ -114,6 +114,7 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | **occurred_at** | DATETIME | |
 | **lat / lng** | DECIMAL(10,7) | |
 | **location_verified** | BOOLEAN | default true; false when manual pin without GPS |
+| location_description | VARCHAR(255) | nullable — written street location; **required by the service layer when `location_verified` is false** |
 | region | VARCHAR(80) | nullable, IX (heatmap grouping) |
 | **injury_flag** | BOOLEAN | default false |
 | police_report_ref | VARCHAR(50) | nullable (required by service layer when track = police_required) |

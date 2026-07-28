@@ -8,6 +8,7 @@ import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { ApiError } from '@/lib/api/errors'
 import type { AccidentCase } from '@/lib/api/types'
+import { findRegion } from '@/lib/regions'
 import { createCase } from './api'
 import {
   EMPTY_DRAFT,
@@ -198,6 +199,8 @@ export function ReportWizard() {
       lat: draft.lat as number,
       lng: draft.lng as number,
       locationVerified: draft.locationVerified,
+      locationDescription: draft.locationDescription.trim() || undefined,
+      region: findRegion(draft.regionCode)?.ar,
       injuryFlag: draft.injuryFlag === true,
       statement: draft.statement.trim(),
       photos: collectPhotos(state),

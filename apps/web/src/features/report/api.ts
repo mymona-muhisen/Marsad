@@ -8,6 +8,8 @@ export type CreateCaseInput = {
   lat: number
   lng: number
   locationVerified: boolean
+  locationDescription?: string
+  region?: string
   injuryFlag: boolean
   statement: string
   photos: File[]
@@ -30,6 +32,14 @@ export function buildCaseFormData(input: CreateCaseInput): FormData {
   form.set('injury_flag', bool(input.injuryFlag))
   form.set('statement', input.statement)
   form.set('hit_and_run', bool(input.hitAndRun))
+
+  if (input.locationDescription) {
+    form.set('location_description', input.locationDescription)
+  }
+  // Feeds the heatmap's grouping column; absent for a pure GPS report.
+  if (input.region) {
+    form.set('region', input.region)
+  }
 
   // Omit rather than send empty strings: `counterparty_phone` is validated by
   // a regex that an empty string would fail, and it is optional for hit-and-run.

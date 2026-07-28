@@ -41,6 +41,18 @@ class SessionTest extends TestCase
         $this->getJson('/api/v1/auth/me')->assertUnauthorized();
     }
 
+    /**
+     * Sanctum's RequestGuard caches the resolved user on the guard instance,
+     * and a feature test shares one application instance across every request
+     * it makes — so without this, the second request silently reuses the first
+     * request's user and the assertion proves nothing. Production resolves auth
+     * from a fresh instance per request; this restores that behaviour.
+     */
+    private function forgetResolvedAuth(): void
+    {
+        $this->app['auth']->forgetGuards();
+    }
+
     public function test_logout_revokes_only_the_calling_token(): void
     {
         $user = User::factory()->create(['phone' => '0922222222']);
@@ -53,16 +65,20 @@ class SessionTest extends TestCase
             ->postJson('/api/v1/auth/logout')
             ->assertOk();
 
+        // Exactly one token row is gone, and it is the caller's.
+        $this->assertSame(1, $user->tokens()->count());
+        $this->assertSame('tablet', $user->tokens()->firstOrFail()->name);
+
         // The signed-out device is done...
+        $this->forgetResolvedAuth();
         $this->withHeader('Authorization', "Bearer {$phone}")
             ->getJson('/api/v1/auth/me')
             ->assertUnauthorized();
 
         // ...but the user's other device keeps its session.
+        $this->forgetResolvedAuth();
         $this->withHeader('Authorization', "Bearer {$tablet}")
             ->getJson('/api/v1/auth/me')
             ->assertOk();
-
-        $this->assertSame(1, $user->tokens()->count());
     }
 }

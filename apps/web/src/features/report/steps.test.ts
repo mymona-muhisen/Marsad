@@ -27,7 +27,13 @@ const validVehicle = {
   occurredAt: '2026-07-28T10:00',
   injuryFlag: false,
 }
-const validLocation = { lat: 33.5138, lng: 36.2765 }
+/** A governorate pick: coordinates plus the written address it requires. */
+const validLocation = {
+  lat: 33.5138,
+  lng: 36.2765,
+  regionCode: 'damascus',
+  locationDescription: 'أوتوستراد المزة، مقابل مشفى الشامي',
+}
 
 describe('validateStep', () => {
   it('requires a vehicle, a time, and an injuries answer', () => {
@@ -63,6 +69,33 @@ describe('validateStep', () => {
       'report.errors.lngRange',
     )
     expect(validateStep('location', state(validLocation))).toBeNull()
+  })
+
+  it('demands a written address when the fix did not come from the device', () => {
+    // Governorate coordinates are city-scale; the same rule runs server-side
+    // in StoreCaseRequest, so the two must agree.
+    expect(
+      validateStep(
+        'location',
+        state({ lat: 33.5138, lng: 36.2765, locationVerified: false }),
+      ),
+    ).toBe('report.errors.locationDescriptionRequired')
+
+    expect(
+      validateStep(
+        'location',
+        state({ lat: 33.5138, lng: 36.2765, locationVerified: false, locationDescription: '   ' }),
+      ),
+    ).toBe('report.errors.locationDescriptionRequired')
+  })
+
+  it('accepts a device fix with no written address', () => {
+    expect(
+      validateStep(
+        'location',
+        state({ lat: 33.5138, lng: 36.2765, locationVerified: true }),
+      ),
+    ).toBeNull()
   })
 
   it('requires all four guided photos', () => {

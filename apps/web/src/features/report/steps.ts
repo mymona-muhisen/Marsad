@@ -56,6 +56,11 @@ export function validateStep(
       }
       if (draft.lat < -90 || draft.lat > 90) return 'report.errors.latRange'
       if (draft.lng < -180 || draft.lng > 180) return 'report.errors.lngRange'
+      // Mirrors StoreCaseRequest: coordinates that did not come from the device
+      // are city-scale, so a written location is mandatory alongside them.
+      if (!draft.locationVerified && draft.locationDescription.trim() === '') {
+        return 'report.errors.locationDescriptionRequired'
+      }
       return null
 
     case 'photos': {

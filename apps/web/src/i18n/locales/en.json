@@ -81,6 +81,8 @@
     "greeting": "Hello, {{name}}",
     "greetingAnonymous": "Welcome",
     "rolesLabel": "Your roles",
+    "reportTitle": "Been in an accident?",
+    "reportBody": "Document it step by step in minutes. You can stop and come back at any point — your details and photos are saved on your device.",
     "sectionsLabel": "Your sections",
     "empty": "No sections are available for your current role.",
     "soon": "Coming soon"
@@ -178,9 +180,16 @@
       "unsupported": "Your browser does not support geolocation. Enter the coordinates manually.",
       "lat": "Latitude",
       "lng": "Longitude",
-      "manualHint": "On a weak connection you can type the coordinates and adjust them later.",
-      "verified": "Location confirmed by your device",
-      "manual": "Manually entered location"
+      "verified": "Your device pinpointed the location",
+      "verifiedBody": "You don't need to write an address, but you can add one if you like.",
+      "manualTitle": "Or write the location",
+      "manualSubtitle": "If your location can't be found automatically, pick the governorate and describe the spot.",
+      "governorate": "Governorate",
+      "governoratePlaceholder": "Choose a governorate",
+      "address": "Where it happened",
+      "addressPlaceholder": "For example: Mezzeh highway, opposite Al-Shami hospital, heading towards Sheikh Saad.",
+      "addressHint": "Name the street, the nearest landmark, and the direction — this is how a surveyor finds you.",
+      "toggleCoordinates": "Enter coordinates manually (advanced)"
     },
 
     "photos": {
@@ -254,7 +263,8 @@
       "occurredAtRequired": "Enter the date and time of the accident.",
       "occurredAtFuture": "The accident time cannot be in the future.",
       "injuryRequired": "Answer the injuries question.",
-      "locationRequired": "Set the accident location.",
+      "locationRequired": "Set the accident location: use automatic detection or pick a governorate.",
+      "locationDescriptionRequired": "Describe where the accident happened — the location is not device-confirmed.",
       "latRange": "Latitude must be between -90 and 90.",
       "lngRange": "Longitude must be between -180 and 180.",
       "photosRequired": "All four guided photos are required.",

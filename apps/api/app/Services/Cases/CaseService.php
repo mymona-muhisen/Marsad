@@ -44,6 +44,8 @@ class CaseService
             'lat' => $data['lat'],
             'lng' => $data['lng'],
             'location_verified' => $data['location_verified'] ?? true,
+            'location_description' => $data['location_description'] ?? null,
+            'region' => $data['region'] ?? null,
             'injury_flag' => $data['injury_flag'] ?? false,
         ]);
 
