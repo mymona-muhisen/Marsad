@@ -29,7 +29,7 @@ class PolicyController extends Controller
     {
         $policies = $this->policies->forUser($request->user())
             ->with('insurer')
-            ->get();
+            ->paginate(min($request->integer('per_page', 15), 100));
 
         return InsurancePolicyResource::collection($policies)->response();
     }

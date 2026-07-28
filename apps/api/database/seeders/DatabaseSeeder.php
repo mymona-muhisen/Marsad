@@ -20,5 +20,9 @@ class DatabaseSeeder extends Seeder
             LiabilityRuleSeeder::class,
             PartsPriceSeeder::class,
         ]);
+
+        if (! app()->isProduction()) {
+            $this->call(DemoSeeder::class);
+        }
     }
 }

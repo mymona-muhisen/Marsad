@@ -27,7 +27,7 @@ class ClaimController extends Controller
                 $status !== null ? ClaimStatus::from($status) : null,
                 (bool) $request->validated('sla_breached', false),
             )
-            ->get();
+            ->paginate(min($request->integer('per_page', 15), 100));
 
         return ClaimResource::collection($claims)->response();
     }

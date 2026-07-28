@@ -17,7 +17,8 @@ class AdjudicationController extends Controller
 
     public function queue(Request $request): JsonResponse
     {
-        $cases = $this->faultDecisions->queue()->get();
+        $cases = $this->faultDecisions->queue()
+            ->paginate(min($request->integer('per_page', 15), 100));
 
         return CaseResource::collection($cases)->response();
     }

@@ -26,7 +26,7 @@ class PolicyController extends Controller
                 $status !== null ? VerificationStatus::from($status) : null,
             )
             ->with('vehicle')
-            ->get();
+            ->paginate(min($request->integer('per_page', 15), 100));
 
         return InsurancePolicyResource::collection($policies)->response();
     }

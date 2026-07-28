@@ -17,7 +17,8 @@ class DispatchController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $dispatches = $this->dispatches->forSurveyor($request->user())->get();
+        $dispatches = $this->dispatches->forSurveyor($request->user())
+            ->paginate(min($request->integer('per_page', 15), 100));
 
         return DispatchResource::collection($dispatches)->response();
     }
