@@ -18,6 +18,14 @@ Object.defineProperty(HTMLMediaElement.prototype, 'pause', {
   value: () => undefined,
 })
 
+// jsdom implements no layout, so scrolling is a no-op rather than a method.
+// The report wizard scrolls back to the top on every step change.
+Object.defineProperty(Element.prototype, 'scrollIntoView', {
+  configurable: true,
+  writable: true,
+  value: () => undefined,
+})
+
 // An unhandled request means a test is hitting an endpoint it never declared —
 // fail loudly rather than hanging on a real network call.
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))

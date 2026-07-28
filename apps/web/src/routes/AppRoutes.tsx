@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react'
 import { Route, Routes } from 'react-router'
 
 import { AppShell } from '@/components/layout/AppShell'
@@ -6,9 +7,17 @@ import { LoginPage } from '@/features/auth/LoginPage'
 import { HomePage } from '@/features/home/HomePage'
 import { PlaceholderSection } from '@/features/home/PlaceholderSection'
 import { SECTIONS } from '@/features/home/sections'
+import { ReportSuccessPage } from '@/features/report/ReportSuccessPage'
+import { ReportWizard } from '@/features/report/ReportWizard'
+import { VehiclesPage } from '@/features/vehicles/VehiclesPage'
 import { VerifyReportPage } from '@/features/verify/VerifyReportPage'
 import { RequireAuth, RequireRole } from './guards'
 import { NotFoundPage } from './NotFoundPage'
+
+/** Sections with a real screen; everything else renders the placeholder. */
+const SECTION_SCREENS: Record<string, ReactElement> = {
+  myVehicles: <VehiclesPage />,
+}
 
 /**
  * Route map. The authenticated sections are generated from the same registry
@@ -26,20 +35,31 @@ export function AppRoutes() {
 
       {/* Authenticated */}
       <Route element={<RequireAuth />}>
-        <Route path="/app" element={<AppShell />}>
-          <Route index element={<HomePage />} />
+        <Route element={<AppShell />}>
+          <Route path="/app">
+            <Route index element={<HomePage />} />
 
-          {SECTIONS.map((section) => (
-            <Route
-              key={section.path}
-              element={<RequireRole allowed={section.roles} />}
-            >
+            {SECTIONS.map((section) => (
               <Route
-                path={section.path}
-                element={<PlaceholderSection sectionId={section.id} />}
-              />
-            </Route>
-          ))}
+                key={section.path}
+                element={<RequireRole allowed={section.roles} />}
+              >
+                <Route
+                  path={section.path}
+                  element={
+                    SECTION_SCREENS[section.id] ?? (
+                      <PlaceholderSection sectionId={section.id} />
+                    )
+                  }
+                />
+              </Route>
+            ))}
+          </Route>
+
+          {/* UC-01. Anonymous visitors clicking the landing CTA land on login
+              first and are returned here by RequireAuth. */}
+          <Route path="/report/new" element={<ReportWizard />} />
+          <Route path="/report/submitted" element={<ReportSuccessPage />} />
         </Route>
       </Route>
 
