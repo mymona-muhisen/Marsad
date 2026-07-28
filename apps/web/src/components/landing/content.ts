@@ -8,7 +8,6 @@
  */
 
 export const brand = {
-  
   logoSrc: '/logo-mark.png',
 } as const
 
