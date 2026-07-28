@@ -11,6 +11,7 @@ import {
   Scale,
   Settings,
   ShieldCheck,
+  Siren,
   TriangleAlert,
   Wallet,
   Wrench,
@@ -70,6 +71,24 @@ export function HomePage() {
           </div>
         ) : null}
       </header>
+
+      {/* The platform's core action. It used to live only on the public
+          landing page, which a signed-in user never sees again. */}
+      <section className="rounded-2xl border border-primary/25 bg-primary/8 p-6 sm:p-8">
+        <h2 className="text-xl font-semibold tracking-tight">
+          {t('home.reportTitle')}
+        </h2>
+        <p className="mt-2 max-w-prose text-sm leading-7 text-foreground/65">
+          {t('home.reportBody')}
+        </p>
+        <Link
+          to="/report/new"
+          className="mt-6 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-primary px-7 font-semibold text-primary-foreground transition hover:brightness-110"
+        >
+          <Siren className="size-5" aria-hidden="true" />
+          {t('nav.report')}
+        </Link>
+      </section>
 
       <section className="flex flex-col gap-4">
         <h2 className="text-sm font-semibold text-foreground/55">

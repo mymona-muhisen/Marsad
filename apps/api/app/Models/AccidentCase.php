@@ -34,6 +34,7 @@ class AccidentCase extends Model
         'lat',
         'lng',
         'location_verified',
+        'location_description',
         'region',
         'injury_flag',
         'police_report_ref',

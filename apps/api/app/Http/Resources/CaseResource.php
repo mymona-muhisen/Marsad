@@ -25,6 +25,7 @@ class CaseResource extends JsonResource
             'lat' => $this->lat,
             'lng' => $this->lng,
             'location_verified' => $this->location_verified,
+            'location_description' => $this->location_description,
             'region' => $this->region,
             'injury_flag' => $this->injury_flag,
             'police_report_ref' => $this->police_report_ref,

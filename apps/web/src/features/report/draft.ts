@@ -15,6 +15,10 @@ export type ReportDraft = {
   lat: number | null
   lng: number | null
   locationVerified: boolean
+  /** Governorate code from `lib/regions.ts`; empty when a GPS fix was used. */
+  regionCode: string
+  /** Written street location — required whenever `locationVerified` is false. */
+  locationDescription: string
   hitAndRun: boolean
   counterpartyPhone: string
   counterpartyPlate: string
@@ -30,6 +34,8 @@ export const EMPTY_DRAFT: ReportDraft = {
   lat: null,
   lng: null,
   locationVerified: false,
+  regionCode: '',
+  locationDescription: '',
   hitAndRun: false,
   counterpartyPhone: '',
   counterpartyPlate: '',

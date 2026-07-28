@@ -504,6 +504,26 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** This works against the "low-end Android browsers" constraint in the design brief and should be the first performance task taken up. The obvious split is the landing page (which anonymous visitors load and which carries the video and all landing copy) away from the authenticated app.
 
+---
+
+### 2026-07-28 (Sprint 9 — review fixes)
+
+**Decision:** Added `accident_cases.location_description` VARCHAR(255) nullable (additive migration; doc 04 §2.3 updated). The service layer requires it whenever `location_verified` is false. `region` was also opened up on `StoreCaseRequest` so the intake can populate it.
+
+**Reason:** Review feedback: asking a driver at a crash site to type decimal degrees is not a real option. The wizard now offers a governorate picker whose centre coordinates satisfy the NOT NULL `lat`/`lng` that the heatmap and black-spot analytics depend on — but a governorate centre is useless to a dispatched surveyor, so the written street location becomes mandatory in exactly that case. Free text could not be stuffed into `region`: doc 04 §2.3 designates it for heatmap grouping and Sprint 7's `AccidentAnalyticsService::blackSpots()` groups on it, so a free-text address there would corrupt the ranking. Self-reported cases previously left `region` null and were silently excluded from black-spot analytics entirely; the governorate picker now fills it.
+
+**Impact:** `location_verified` becomes a load-bearing flag, not just metadata — it decides whether a description is required, and only a device GPS fix sets it true. The rule is mirrored in `steps.ts::validateStep` on the frontend; the two must stay in agreement. Governorate coordinates live in `apps/web/src/lib/regions.ts`.
+
+---
+
+### 2026-07-28 (Sprint 9 — review fixes)
+
+**Decision:** `tests/Feature/Auth/SessionTest::test_logout_revokes_only_the_calling_token` (written in Sprint 8, never executed until now) was **failing**. Fixed by calling `$this->app['auth']->forgetGuards()` between requests and asserting the surviving token's name at the database level.
+
+**Reason:** Sanctum's `RequestGuard::user()` caches the resolved user on the guard instance, and a Laravel feature test shares one application instance across every request it makes. The second request therefore reused the first request's already-authenticated user and returned 200 instead of 401 — the test was asserting nothing about revocation. Production resolves auth from a fresh instance per request, so the endpoint itself was always correct.
+
+**Impact:** Any future test that needs a *second* request to re-authenticate (token revocation, role changes taking effect, impersonation) must forget the guards first, or it will silently pass against stale state. This is exactly the failure the Sprint 8 entry above warned was possible while MySQL was unavailable — the full suite is now green at 124 tests / 575 assertions.
+
 ## Template
 
 ### YYYY-MM-DD
