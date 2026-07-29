@@ -86,6 +86,7 @@ Route::prefix('v1')->group(function () {
             Route::post('objections/{objection}/resolve', [ObjectionController::class, 'resolve']);
         });
 
+        Route::get('claims', [ClaimController::class, 'index']);
         Route::get('claims/{claim}', [ClaimController::class, 'show']);
         Route::post('claims/{claim}/estimates', [EstimateController::class, 'store'])->middleware('role:assessor|workshop');
 

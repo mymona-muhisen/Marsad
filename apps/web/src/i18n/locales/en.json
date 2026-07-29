@@ -246,6 +246,91 @@
     }
   },
 
+  "claims": {
+    "title": "My claims",
+    "subtitle": "Follow your insurance claim step by step, and when the insurer is required to respond.",
+    "empty": "No claims yet. A claim opens automatically once the final report on your case is issued.",
+    "openedAt": "Opened",
+    "caseNo": "Case",
+    "open": "View details",
+
+    "sla": {
+      "label": "Binding response deadline",
+      "remaining": "{{days}}d {{hours}}h left",
+      "remainingHours": "{{hours}}h {{minutes}}m left",
+      "remainingMinutes": "{{minutes}} minutes left",
+      "breached": "The insurer is {{days}} days past the binding deadline",
+      "breachedHours": "The insurer is {{hours}} hours past the binding deadline",
+      "met": "Answered within the binding deadline."
+    },
+
+    "detail": {
+      "title": "Claim details",
+      "claimNo": "Claim number",
+      "viewCase": "View the case",
+      "notFound": "This claim does not exist, or you are not allowed to view it."
+    },
+
+    "timeline": {
+      "title": "Claim progress",
+      "empty": "No events recorded yet.",
+      "actions": {
+        "opened": "Claim opened with the insurer",
+        "decided": "The insurer issued its decision",
+        "estimate_submitted": "Damage estimate submitted",
+        "settled": "Settled",
+        "closed": "Claim closed",
+        "sla_breached": "The insurer passed the binding response deadline"
+      },
+      "reason": "Stated reason",
+      "note": "Note"
+    },
+
+    "reasonCodes": {
+      "fully_covered": "Fully covered",
+      "coverage_limit": "Coverage limit reached",
+      "deviation_adjusted": "Estimate adjusted for exceeding reference prices",
+      "policy_lapsed": "Policy has lapsed",
+      "damage_not_covered": "Damage not covered by the policy",
+      "fraud_suspected": "Fraud suspected",
+      "missing_documents": "Missing documents",
+      "need_clarification": "Estimate needs clarification"
+    },
+
+    "estimates": {
+      "title": "Damage estimates",
+      "empty": "No damage estimate submitted yet.",
+      "total": "Total",
+      "items": "Line items",
+      "description": "Item",
+      "qty": "Qty",
+      "unitPrice": "Unit price",
+      "lineTotal": "Total",
+      "deviation": "Price exceeds the reference list",
+      "types": {
+        "workshop": "From a workshop",
+        "assessor": "From an assessor",
+        "desk": "Desk assessment"
+      },
+      "statuses": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "accepted": "Accepted",
+        "rejected": "Rejected"
+      }
+    },
+
+    "settlement": {
+      "title": "Settlement",
+      "amount": "Amount",
+      "settledAt": "Settled on",
+      "modes": {
+        "repair_order": "Repair order at an accredited workshop",
+        "cash": "Cash compensation"
+      }
+    }
+  },
+
   "vehicles": {
     "title": "My vehicles",
     "subtitle": "Add your vehicle before reporting an accident — a report is always tied to a vehicle registered in your name.",
