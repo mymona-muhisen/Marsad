@@ -10,6 +10,9 @@ import { ClaimDetailPage } from '@/features/claims/ClaimDetailPage'
 import { ClaimsPage } from '@/features/claims/ClaimsPage'
 import { QueuePage } from '@/features/adjudication/QueuePage'
 import { ReviewCasePage } from '@/features/adjudication/ReviewCasePage'
+import { InsurerClaimDetailPage } from '@/features/insurer/InsurerClaimDetailPage'
+import { InsurerClaimsPage } from '@/features/insurer/InsurerClaimsPage'
+import { InsurerPoliciesPage } from '@/features/insurer/InsurerPoliciesPage'
 import { HomePage } from '@/features/home/HomePage'
 import { PlaceholderSection } from '@/features/home/PlaceholderSection'
 import { SECTIONS } from '@/features/home/sections'
@@ -26,6 +29,8 @@ const SECTION_SCREENS: Record<string, ReactElement> = {
   myCases: <CasesPage />,
   myClaims: <ClaimsPage />,
   adjudicationQueue: <QueuePage />,
+  insurerClaims: <InsurerClaimsPage />,
+  insurerPolicies: <InsurerPoliciesPage />,
 }
 
 /**
@@ -74,6 +79,19 @@ export function AppRoutes() {
               <Route
                 path="/app/adjudication/cases/:caseNo"
                 element={<ReviewCasePage />}
+              />
+            </Route>
+
+            {/* Both insurer roles read a claim; the page itself withholds the
+                decision and settlement controls from the admin. */}
+            <Route
+              element={
+                <RequireRole allowed={['insurer_agent', 'insurer_admin']} />
+              }
+            >
+              <Route
+                path="/app/insurer/claims/:claimId"
+                element={<InsurerClaimDetailPage />}
               />
             </Route>
           </Route>

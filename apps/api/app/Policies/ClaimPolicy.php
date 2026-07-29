@@ -14,11 +14,25 @@ class ClaimPolicy
             return true;
         }
 
-        return $user->hasRole(RoleName::InsurerAgent->value) && $user->organization_id === $claim->insurer_org_id;
+        // Reading includes the insurer admin: doc 01 §B.4 gives that role an
+        // SLA dashboard, which is a view over its own company's claims.
+        return $this->belongsToInsurer($user, $claim, [
+            RoleName::InsurerAgent->value,
+            RoleName::InsurerAdmin->value,
+        ]);
     }
 
+    /** Acting on a claim is the agent's alone — deciding, settling. */
     public function manage(User $user, Claim $claim): bool
     {
-        return $user->hasRole(RoleName::InsurerAgent->value) && $user->organization_id === $claim->insurer_org_id;
+        return $this->belongsToInsurer($user, $claim, [RoleName::InsurerAgent->value]);
+    }
+
+    /**
+     * @param  list<string>  $roles
+     */
+    private function belongsToInsurer(User $user, Claim $claim, array $roles): bool
+    {
+        return $user->hasAnyRole($roles) && $user->organization_id === $claim->insurer_org_id;
     }
 }

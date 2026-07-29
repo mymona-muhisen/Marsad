@@ -634,6 +634,36 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** Duplicated logic across the language boundary, pinned by tests on the frontend side only. If `matchesRuleSplit` changes — weighted splits across three parties, say — `decision.ts` must change with it or the console will gate on the wrong condition.
 
+---
+
+### 2026-07-30 (Sprint 13)
+
+**Decision:** The `insurer` route group was split: reads (`GET claims`, `GET claims/{claim}`, `GET policies`, `GET workshops`) are open to `insurer_agent|insurer_admin`, while every mutation stays `insurer_agent`. `ClaimPolicy::view` was widened to match; `ClaimPolicy::manage` was not. `InsurerClaimController::show` now authorises `view` rather than `manage`.
+
+**Reason:** Every insurer route required `insurer_agent`, but the frontend section registry offered the insurer screens to `insurer_admin` too — so an admin was handed a screen that 403'd on load. Doc 01 §B.4 settles the split: the agent "process[es] claims, approve[s] settlements", while the admin gets an "SLA dashboard" and the "accredited workshop list", which are views over exactly this data. The middleware change alone was not enough and the tests caught it — `show()` authorised `manage`, so the admin still got 403 at the policy layer. That second layer is the part a middleware-only fix would have missed.
+
+**Impact:** `manage` is now the only insurer ability that implies authority; anything acting on a claim must check it, not `view`. The claim detail screen hides the decision panel and settlement form from the admin rather than letting them fail — showing controls that answer 403 is worse than not showing them, and the two rules now have to be kept in step.
+
+---
+
+### 2026-07-30 (Sprint 13)
+
+**Decision:** Added `GET /api/v1/insurer/workshops`, listing `active` workshop organisations only, unpaginated.
+
+**Reason:** `RecordSettlementRequest` requires `workshop_org_id` when the mode is `repair_order`, and no endpoint existed for a client to discover a valid id — the settlement form was unbuildable. Filtering to `active` is deliberate: a settlement issues a repair order to whichever workshop is chosen, so a suspended one must not be selectable.
+
+**Impact:** A workshop suspended after a repair order was issued still holds that order; this endpoint governs new selections only. Nothing revalidates `workshop_org_id` against accreditation at settlement time — the FormRequest only checks the row exists.
+
+---
+
+### 2026-07-30 (Sprint 13)
+
+**Decision:** Extracted `ClaimTimeline` and `EstimateCard` out of the citizen `ClaimDetailPage` into shared components, and the insurer console reuses them together with `SlaIndicator`. A separate insurer-side SLA chip was written and then deleted.
+
+**Reason:** The chip computed remaining time from `sla_due_at` against the device clock, while `SlaIndicator` (Sprint 11) ticks from the server's `sla_seconds_remaining`. Two renderings of the same deadline that disagree is exactly the failure mode the server-side countdown was introduced to avoid, and the insurer and the claimant seeing different numbers on the same claim is worse than either being slightly stale. The claims table now also sorts on `sla_seconds_remaining` rather than a locally derived figure.
+
+**Impact:** Three components are now shared across two role-facing features, so a change to the timeline or the deviation flag lands on both consoles at once — which is the point, but it means neither can be restyled independently without a prop.
+
 ## Template
 
 ### YYYY-MM-DD

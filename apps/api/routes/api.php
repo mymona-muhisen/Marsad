@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\EvidenceController;
 use App\Http\Controllers\Api\V1\Insurer\ClaimController as InsurerClaimController;
 use App\Http\Controllers\Api\V1\Insurer\PolicyController as InsurerPolicyController;
 use App\Http\Controllers\Api\V1\Insurer\SettlementController;
+use App\Http\Controllers\Api\V1\Insurer\WorkshopController as InsurerWorkshopController;
 use App\Http\Controllers\Api\V1\PolicyController;
 use App\Http\Controllers\Api\V1\Regulator\FraudFlagController;
 use App\Http\Controllers\Api\V1\Regulator\SlaReportController;
@@ -50,15 +51,27 @@ Route::prefix('v1')->group(function () {
         Route::post('vehicles/{vehicle}/policies', [PolicyController::class, 'store']);
         Route::get('policies', [PolicyController::class, 'mine']);
 
-        Route::prefix('insurer')->middleware('role:insurer_agent')->group(function () {
-            Route::get('policies', [InsurerPolicyController::class, 'index']);
-            Route::post('policies/{policy}/verify', [InsurerPolicyController::class, 'verify']);
-            Route::post('policies/{policy}/reject', [InsurerPolicyController::class, 'reject']);
+        Route::prefix('insurer')->group(function () {
+            /*
+             | Reads are open to both insurer roles: doc 01 §B.4 gives
+             | `insurer_admin` an SLA dashboard and the accredited workshop
+             | list, which are views over exactly this data. Only the agent
+             | acts on a claim — "process claims, approve settlements" is the
+             | agent's line in that table, not the admin's.
+             */
+            Route::middleware('role:insurer_agent|insurer_admin')->group(function () {
+                Route::get('policies', [InsurerPolicyController::class, 'index']);
+                Route::get('claims', [InsurerClaimController::class, 'index']);
+                Route::get('claims/{claim}', [InsurerClaimController::class, 'show']);
+                Route::get('workshops', [InsurerWorkshopController::class, 'index']);
+            });
 
-            Route::get('claims', [InsurerClaimController::class, 'index']);
-            Route::get('claims/{claim}', [InsurerClaimController::class, 'show']);
-            Route::post('claims/{claim}/decide', [InsurerClaimController::class, 'decide']);
-            Route::post('claims/{claim}/settlement', [SettlementController::class, 'store']);
+            Route::middleware('role:insurer_agent')->group(function () {
+                Route::post('policies/{policy}/verify', [InsurerPolicyController::class, 'verify']);
+                Route::post('policies/{policy}/reject', [InsurerPolicyController::class, 'reject']);
+                Route::post('claims/{claim}/decide', [InsurerClaimController::class, 'decide']);
+                Route::post('claims/{claim}/settlement', [SettlementController::class, 'store']);
+            });
         });
 
         Route::get('cases', [CaseController::class, 'index']);
