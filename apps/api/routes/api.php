@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Adjudication\AdjudicationController;
+use App\Http\Controllers\Api\V1\Adjudication\LiabilityRuleController;
 use App\Http\Controllers\Api\V1\Adjudication\ObjectionController;
 use App\Http\Controllers\Api\V1\Auth\OtpController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
@@ -81,6 +82,11 @@ Route::prefix('v1')->group(function () {
             Route::get('queue', [AdjudicationController::class, 'queue']);
             Route::post('cases/{case}/decide', [AdjudicationController::class, 'decide']);
         });
+
+        // The matrix itself — read by both the decision form and the appeals
+        // panel, which may amend allocations when resolving an objection.
+        Route::get('liability-rules', [LiabilityRuleController::class, 'index'])
+            ->middleware('role:adjudicator|senior_adjudicator');
 
         Route::prefix('adjudication')->middleware('role:senior_adjudicator')->group(function () {
             Route::post('objections/{objection}/resolve', [ObjectionController::class, 'resolve']);

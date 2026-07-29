@@ -8,6 +8,8 @@ import { CaseDetailPage } from '@/features/cases/CaseDetailPage'
 import { CasesPage } from '@/features/cases/CasesPage'
 import { ClaimDetailPage } from '@/features/claims/ClaimDetailPage'
 import { ClaimsPage } from '@/features/claims/ClaimsPage'
+import { QueuePage } from '@/features/adjudication/QueuePage'
+import { ReviewCasePage } from '@/features/adjudication/ReviewCasePage'
 import { HomePage } from '@/features/home/HomePage'
 import { PlaceholderSection } from '@/features/home/PlaceholderSection'
 import { SECTIONS } from '@/features/home/sections'
@@ -23,6 +25,7 @@ const SECTION_SCREENS: Record<string, ReactElement> = {
   myVehicles: <VehiclesPage />,
   myCases: <CasesPage />,
   myClaims: <ClaimsPage />,
+  adjudicationQueue: <QueuePage />,
 }
 
 /**
@@ -65,6 +68,13 @@ export function AppRoutes() {
             <Route element={<RequireRole allowed={['citizen']} />}>
               <Route path="/app/cases/:caseNo" element={<CaseDetailPage />} />
               <Route path="/app/claims/:claimId" element={<ClaimDetailPage />} />
+            </Route>
+
+            <Route element={<RequireRole allowed={['adjudicator']} />}>
+              <Route
+                path="/app/adjudication/cases/:caseNo"
+                element={<ReviewCasePage />}
+              />
             </Route>
           </Route>
 
