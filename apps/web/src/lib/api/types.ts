@@ -92,6 +92,18 @@ export type ClaimStatus =
   | 'settled'
   | 'closed'
 
+/** Mirrors `App\Http\Resources\LiabilityRuleResource` — the liability matrix. */
+export type LiabilityRule = {
+  id: number
+  scenario_code: string
+  description_ar: string
+  fault_split_a: number
+  fault_split_b: number
+  /** Reference data is versioned, never updated in place (CLAUDE.md rule 5). */
+  version: number
+  effective_from: string
+}
+
 /** Mirrors `App\Http\Resources\ObjectionResource`. */
 export type Objection = {
   id: number

@@ -246,6 +246,51 @@
     }
   },
 
+  "adjudication": {
+    "queue": {
+      "title": "Liability review queue",
+      "subtitle": "Cases whose evidence is complete and are waiting on a decision. Oldest first.",
+      "empty": "Nothing waiting for review.",
+      "parties": "{{count}} parties",
+      "statements": "{{count}} statements",
+      "review": "Review"
+    },
+
+    "review": {
+      "title": "Review case",
+      "notFound": "This case does not exist, or you are not allowed to review it.",
+      "backToQueue": "Back to the queue",
+      "statements": "Statements",
+      "noStatement": "This party filed no written statement.",
+      "reporter": "Reporting party",
+      "counterparty": "Other party",
+      "evidenceFor": "{{party}}'s evidence",
+      "statementsHint": "Read both accounts side by side before picking a rule. The platform does not analyse the text — the judgement is yours."
+    },
+
+    "decide": {
+      "title": "Decision",
+      "scenario": "Applicable rule",
+      "scenarioPlaceholder": "Choose a rule",
+      "manual": "Manual decision, no rule",
+      "proposal": "Automatic proposal",
+      "proposalHint": "The chosen rule's split. Adjust it if you see otherwise, and say why.",
+      "applyProposal": "Apply the proposal",
+      "allocations": "Liability split",
+      "total": "Total",
+      "mustEqual": "The total must be exactly 100.",
+      "overrideNotice": "The split departs from the rule's proposal — a justification is required.",
+      "manualNotice": "Manual decision with no rule — a justification is required.",
+      "justification": "Justification",
+      "justificationPlaceholder": "Explain which evidence you relied on, and why you departed from the proposal if you did.",
+      "justificationRequired": "A justification is required when departing from the proposal or deciding manually.",
+      "submit": "Issue the decision",
+      "submitting": "Issuing…",
+      "success": "The decision is issued and the objection window has started.",
+      "irreversible": "A decision cannot be undone once issued; an objection is the only route to changing it."
+    }
+  },
+
   "claims": {
     "title": "My claims",
     "subtitle": "Follow your insurance claim step by step, and when the insurer is required to respond.",

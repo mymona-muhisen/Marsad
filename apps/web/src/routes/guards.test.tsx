@@ -62,11 +62,19 @@ describe('route guards', () => {
   it('allows a role-guarded route for the right role', async () => {
     signInWithToken()
     mockMe(['adjudicator'])
+    server.use(
+      http.get('/api/v1/adjudication/queue', () =>
+        HttpResponse.json({
+          data: [],
+          meta: { current_page: 1, last_page: 1, per_page: 50, total: 0 },
+        }),
+      ),
+    )
 
     renderWithProviders(<AppRoutes />, { route: '/app/adjudication/queue' })
 
     expect(
-      await screen.findByRole('heading', { name: 'قائمة المراجعة' }),
+      await screen.findByRole('heading', { name: 'قائمة تحديد المسؤولية' }),
     ).toBeInTheDocument()
   })
 

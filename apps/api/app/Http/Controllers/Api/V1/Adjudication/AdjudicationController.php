@@ -18,6 +18,9 @@ class AdjudicationController extends Controller
     public function queue(Request $request): JsonResponse
     {
         $cases = $this->faultDecisions->queue()
+            // The queue rows show how many parties filed and whether both
+            // statements are in, so the reviewer can pick what is ready.
+            ->with('parties')
             ->paginate(min($request->integer('per_page', 15), 100));
 
         return CaseResource::collection($cases)->response();

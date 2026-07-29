@@ -594,6 +594,46 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** These are not credentials — sign-in is still phone + OTP with a random code, and the seeder never runs in production. The seeder uses `syncRoles` rather than `assignRole` so re-seeding neither stacks role rows nor leaves a hand-removed role missing. `phpstan.neon` gained one scoped ignore: `Seeder::$command` is documented non-nullable but is genuinely unset when a seeder is constructed directly, and Laravel's own `Seeder` guards it with `isset` for that reason.
 
+---
+
+### 2026-07-29 (Sprint 12)
+
+**Decision:** `AccidentCasePolicy::view` now also admits `adjudicator` and `senior_adjudicator`. The grant is limited to those two roles — surveyors still reach cases through their dispatch, insurers through the claim.
+
+**Reason:** The policy only admitted case parties, so `GET /adjudication/queue` listed cases and every one of them answered **403** when opened. The adjudicator console was unreachable by construction, and no test caught it because nothing had ever opened a case as a non-party. Verified against the seeded database before changing anything: `$adjudicator->can('view', $case)` returned false for a queue row.
+
+**Impact:** Two roles now hold a blanket read over every accident case. That is the nature of the job — an adjudicator is assigned cases they have no prior relationship with — but it is the first non-party read in the system, and the audit log (Sprint 7) records decisions rather than reads. If read auditing is ever required, this is the access path that needs it.
+
+---
+
+### 2026-07-29 (Sprint 12)
+
+**Decision:** Added `GET /api/v1/liability-rules`, returning only the current version of each scenario (`effective_to IS NULL`, highest `version`), unpaginated.
+
+**Reason:** The console's proposal card had no data source — `liability_rules` had no endpoint at all. Version filtering happens server-side because CLAUDE.md rule 5 makes reference data versioned and never updated in place; a superseded split must not be offered as a proposal, and leaving that filter to the client would put the rule in two places. The response is unpaginated because it is a dozen rows the decision form needs in full to render a scenario picker.
+
+**Impact:** Rules are cached for ten minutes in the query client. A newly published rule version takes that long to appear in an open console.
+
+---
+
+### 2026-07-29 (Sprint 12)
+
+**Decision:** The console lays the two statements out side by side and states plainly that it does not analyse them. No contradiction detection was implemented, despite the design brief asking for "auto-highlighted contradictions".
+
+**Reason:** Detecting that two Arabic free-text accounts contradict each other is a natural-language problem, and nothing short of a real model does it. The available alternatives were all worse than nothing: keyword matching would highlight noise, and any highlight at all carries an implicit claim of reliability on a screen where a reviewer assigns legal liability. A reviewer who trusts a bad highlight is worse off than one who reads both accounts. The screen says the judgement is theirs.
+
+**Impact:** The brief's requirement is unmet and deliberately so. If it is taken up later, the honest form is a model-backed service behind an adapter (CLAUDE.md rule 4) whose output is labelled as a suggestion and never pre-fills the allocation.
+
+---
+
+### 2026-07-29 (Sprint 12)
+
+**Decision:** The frontend's override rule (`decision.ts`) re-implements `FaultDecisionService::matchesRuleSplit()`, including its sort, and is unit-tested against that behaviour.
+
+**Reason:** The backend requires a justification whenever the split departs from the rule, and rejects the submission otherwise. Without the same rule client-side, the reviewer would write a decision, submit, and be told no by a round trip. The sort matters: a rule states 100/0 without naming which party is which, so assigning 100 to either party still counts as following it.
+
+**Impact:** Duplicated logic across the language boundary, pinned by tests on the frontend side only. If `matchesRuleSplit` changes — weighted splits across three parties, say — `decision.ts` must change with it or the console will gate on the wrong condition.
+
 ## Template
 
 ### YYYY-MM-DD
