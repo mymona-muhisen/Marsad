@@ -246,6 +246,101 @@
     }
   },
 
+  "insurer": {
+    "claims": {
+      "title": "المطالبات الواردة",
+      "subtitle": "مطالبات شركتك. الأقرب إلى انتهاء المهلة أولاً.",
+      "empty": "لا توجد مطالبات مطابقة.",
+      "filterStatus": "الحالة",
+      "filterAll": "كل الحالات",
+      "filterBreached": "المتجاوزة للمهلة فقط",
+      "caseNo": "رقم القضية",
+      "sla": "المهلة",
+      "slaLeft": "متبقٍ {{time}}",
+      "slaBreached": "تجاوزت المهلة",
+      "open": "فتح"
+    },
+
+    "claim": {
+      "title": "تفاصيل المطالبة",
+      "notFound": "المطالبة غير موجودة أو لا تملك صلاحية عرضها.",
+      "back": "العودة إلى المطالبات",
+      "estimates": "تقديرات الأضرار",
+      "noEstimates": "لم يُقدَّم تقدير بعد.",
+      "deviation": "تجاوز السعر المرجعي",
+      "settlement": "التسوية",
+      "settled": "سُجّلت التسوية",
+      "readOnly": "لديك صلاحية العرض فقط — إصدار القرار والتسوية من صلاحية موظف المطالبات."
+    },
+
+    "decide": {
+      "title": "القرار",
+      "outcome": "القرار",
+      "outcomes": {
+        "approve": "موافقة كاملة",
+        "partial": "موافقة جزئية",
+        "reject": "رفض",
+        "request_info": "طلب معلومات إضافية"
+      },
+      "reasonCode": "سبب القرار",
+      "reasonPlaceholder": "اختر السبب",
+      "reasonRequired": "سبب القرار إلزامي.",
+      "reasons": {
+        "fully_covered": "مشمول بالتغطية كاملاً",
+        "coverage_limit": "بلغ حدّ التغطية",
+        "deviation_adjusted": "تعديل لتجاوز الأسعار المرجعية",
+        "policy_lapsed": "الوثيقة منتهية",
+        "damage_not_covered": "الضرر غير مشمول",
+        "fraud_suspected": "شبهة احتيال",
+        "missing_documents": "مستندات ناقصة",
+        "need_clarification": "التقدير يحتاج توضيحاً"
+      },
+      "note": "ملاحظة",
+      "notePlaceholder": "تفاصيل تُعرَض على المطالِب مع القرار.",
+      "submit": "تسجيل القرار",
+      "submitting": "جارٍ التسجيل…",
+      "mandatoryNotice": "كل قرار يُسجَّل بسببه في سجلّ المطالبة، ويظهر للمطالِب."
+    },
+
+    "settle": {
+      "title": "تسجيل التسوية",
+      "mode": "طريقة التسوية",
+      "modes": {
+        "repair_order": "أمر إصلاح لدى ورشة",
+        "cash": "تعويض نقدي"
+      },
+      "amount": "المبلغ (ل.س)",
+      "amountRequired": "أدخل مبلغاً صحيحاً.",
+      "workshop": "الورشة",
+      "workshopPlaceholder": "اختر الورشة",
+      "workshopRequired": "اختيار الورشة مطلوب لأمر الإصلاح.",
+      "submit": "تسجيل التسوية",
+      "submitting": "جارٍ التسجيل…"
+    },
+
+    "policies": {
+      "title": "طلبات التحقق من الوثائق",
+      "subtitle": "وثائق أضافها مواطنون وتنتظر تحققاً من شركتك.",
+      "empty": "لا توجد طلبات مطابقة.",
+      "policyNo": "رقم الوثيقة",
+      "period": "مدة السريان",
+      "status": "الحالة",
+      "filterStatus": "الحالة",
+      "statuses": {
+        "pending": "بانتظار التحقق",
+        "verified": "مُتحقَّق منها",
+        "rejected": "مرفوضة"
+      },
+      "verify": "تحقّق",
+      "reject": "رفض",
+      "rejectReason": "سبب الرفض",
+      "rejectReasonPlaceholder": "مثال: رقم الوثيقة غير موجود في سجلاتنا.",
+      "confirmReject": "تأكيد الرفض",
+      "cancel": "إلغاء",
+      "document": "المستند المرفق"
+    }
+  },
+
   "adjudication": {
     "queue": {
       "title": "قائمة تحديد المسؤولية",

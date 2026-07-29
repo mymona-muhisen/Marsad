@@ -34,7 +34,9 @@ class ClaimController extends Controller
 
     public function show(Request $request, Claim $claim): JsonResponse
     {
-        $this->authorize('manage', $claim);
+        // 'view', not 'manage' — reading a claim is not acting on one, and the
+        // insurer admin reads without the authority to decide.
+        $this->authorize('view', $claim);
 
         $claim->load(['events', 'estimates.items', 'settlement']);
 

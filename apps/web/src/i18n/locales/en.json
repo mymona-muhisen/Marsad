@@ -246,6 +246,101 @@
     }
   },
 
+  "insurer": {
+    "claims": {
+      "title": "Incoming claims",
+      "subtitle": "Your company's claims. Closest to the deadline first.",
+      "empty": "No matching claims.",
+      "filterStatus": "Status",
+      "filterAll": "All statuses",
+      "filterBreached": "Past deadline only",
+      "caseNo": "Case number",
+      "sla": "Deadline",
+      "slaLeft": "{{time}} left",
+      "slaBreached": "Past deadline",
+      "open": "Open"
+    },
+
+    "claim": {
+      "title": "Claim detail",
+      "notFound": "This claim does not exist, or you are not allowed to view it.",
+      "back": "Back to claims",
+      "estimates": "Damage estimates",
+      "noEstimates": "No estimate submitted yet.",
+      "deviation": "Above the reference price",
+      "settlement": "Settlement",
+      "settled": "Settlement recorded",
+      "readOnly": "You have read access only — deciding and settling belong to the claims agent."
+    },
+
+    "decide": {
+      "title": "Decision",
+      "outcome": "Decision",
+      "outcomes": {
+        "approve": "Approve in full",
+        "partial": "Approve in part",
+        "reject": "Reject",
+        "request_info": "Request more information"
+      },
+      "reasonCode": "Reason",
+      "reasonPlaceholder": "Choose a reason",
+      "reasonRequired": "A reason code is mandatory.",
+      "reasons": {
+        "fully_covered": "Fully covered",
+        "coverage_limit": "Coverage limit reached",
+        "deviation_adjusted": "Adjusted for price deviation",
+        "policy_lapsed": "Policy lapsed",
+        "damage_not_covered": "Damage not covered",
+        "fraud_suspected": "Fraud suspected",
+        "missing_documents": "Missing documents",
+        "need_clarification": "Estimate needs clarification"
+      },
+      "note": "Note",
+      "notePlaceholder": "Detail shown to the claimant alongside the decision.",
+      "submit": "Record the decision",
+      "submitting": "Recording…",
+      "mandatoryNotice": "Every decision is logged with its reason on the claim timeline, and the claimant sees it."
+    },
+
+    "settle": {
+      "title": "Record a settlement",
+      "mode": "Settlement mode",
+      "modes": {
+        "repair_order": "Repair order at a workshop",
+        "cash": "Cash compensation"
+      },
+      "amount": "Amount (SYP)",
+      "amountRequired": "Enter a valid amount.",
+      "workshop": "Workshop",
+      "workshopPlaceholder": "Choose a workshop",
+      "workshopRequired": "A workshop is required for a repair order.",
+      "submit": "Record the settlement",
+      "submitting": "Recording…"
+    },
+
+    "policies": {
+      "title": "Policy verification requests",
+      "subtitle": "Policies citizens added that await verification by your company.",
+      "empty": "No matching requests.",
+      "policyNo": "Policy number",
+      "period": "Valid",
+      "status": "Status",
+      "filterStatus": "Status",
+      "statuses": {
+        "pending": "Awaiting verification",
+        "verified": "Verified",
+        "rejected": "Rejected"
+      },
+      "verify": "Verify",
+      "reject": "Reject",
+      "rejectReason": "Reason for rejection",
+      "rejectReasonPlaceholder": "For example: this policy number is not in our records.",
+      "confirmReject": "Confirm rejection",
+      "cancel": "Cancel",
+      "document": "Attached document"
+    }
+  },
+
   "adjudication": {
     "queue": {
       "title": "Liability review queue",

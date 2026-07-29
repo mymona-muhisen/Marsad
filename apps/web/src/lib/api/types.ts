@@ -92,6 +92,53 @@ export type ClaimStatus =
   | 'settled'
   | 'closed'
 
+/** Mirrors `App\Http\Resources\OrganizationResource`. */
+export type Organization = {
+  id: number
+  name_ar: string
+  name_en: string
+  type: 'insurer' | 'workshop' | 'assessor_office' | 'regulator' | 'authority'
+  license_no: string | null
+  status: string
+}
+
+/** Mirrors `App\Http\Resources\InsurancePolicyResource`. */
+export type InsurancePolicy = {
+  id: number
+  vehicle_id: number
+  insurer_org_id: number
+  insurer_name?: string
+  policy_no: string
+  type: string
+  start_date: string
+  end_date: string
+  verification_status: 'pending' | 'verified' | 'rejected'
+  verified_at: string | null
+  document_path: string | null
+  created_at: string
+}
+
+/** Mirrors `App\Enums\ClaimDecisionOutcome`. */
+export type ClaimDecisionOutcome =
+  | 'approve'
+  | 'partial'
+  | 'reject'
+  | 'request_info'
+
+/** Mirrors `App\Enums\ClaimReasonCode` — mandatory on every decision. */
+export type ClaimReasonCode =
+  | 'fully_covered'
+  | 'coverage_limit'
+  | 'deviation_adjusted'
+  | 'policy_lapsed'
+  | 'damage_not_covered'
+  | 'fraud_suspected'
+  | 'missing_documents'
+  | 'need_clarification'
+
+/** Mirrors `App\Enums\SettlementMode`. */
+export type SettlementMode = 'repair_order' | 'cash'
+
 /** Mirrors `App\Http\Resources\LiabilityRuleResource` — the liability matrix. */
 export type LiabilityRule = {
   id: number
