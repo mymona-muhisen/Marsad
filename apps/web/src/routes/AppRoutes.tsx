@@ -6,6 +6,8 @@ import { LandingPage } from '@/components/landing/LandingPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { CaseDetailPage } from '@/features/cases/CaseDetailPage'
 import { CasesPage } from '@/features/cases/CasesPage'
+import { ClaimDetailPage } from '@/features/claims/ClaimDetailPage'
+import { ClaimsPage } from '@/features/claims/ClaimsPage'
 import { HomePage } from '@/features/home/HomePage'
 import { PlaceholderSection } from '@/features/home/PlaceholderSection'
 import { SECTIONS } from '@/features/home/sections'
@@ -20,6 +22,7 @@ import { NotFoundPage } from './NotFoundPage'
 const SECTION_SCREENS: Record<string, ReactElement> = {
   myVehicles: <VehiclesPage />,
   myCases: <CasesPage />,
+  myClaims: <ClaimsPage />,
 }
 
 /**
@@ -58,9 +61,10 @@ export function AppRoutes() {
               </Route>
             ))}
 
-            {/* Case detail sits under the same citizen guard as the list. */}
+            {/* Detail screens sit under the same citizen guard as their lists. */}
             <Route element={<RequireRole allowed={['citizen']} />}>
               <Route path="/app/cases/:caseNo" element={<CaseDetailPage />} />
+              <Route path="/app/claims/:claimId" element={<ClaimDetailPage />} />
             </Route>
           </Route>
 

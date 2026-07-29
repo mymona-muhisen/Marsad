@@ -133,6 +133,76 @@ export type CaseReportSummary = {
   qr_token: string
 }
 
+/** Actions written to `claim_events` by the services (doc 04 §2.5). */
+export type ClaimEventAction =
+  | 'opened'
+  | 'decided'
+  | 'estimate_submitted'
+  | 'settled'
+  | 'closed'
+  | 'sla_breached'
+
+/** Mirrors `App\Http\Resources\ClaimEventResource`. */
+export type ClaimEvent = {
+  id: number
+  actor_id: number | null
+  action: ClaimEventAction
+  /** Mirrors `App\Enums\ClaimReasonCode` — mandatory on insurer decisions. */
+  reason_code: string | null
+  note: string | null
+  created_at: string
+}
+
+export type EstimateItem = {
+  id: number
+  part_price_id: number | null
+  description: string
+  qty: number
+  unit_price: string
+  labor_hours: string | null
+  line_total: string
+  /** FR-CL3: unit price deviates from the reference list beyond the threshold. */
+  deviation_flag: boolean
+}
+
+/** Mirrors `App\Http\Resources\DamageEstimateResource`. */
+export type DamageEstimate = {
+  id: number
+  claim_id: number
+  type: 'workshop' | 'assessor' | 'desk'
+  status: 'draft' | 'submitted' | 'accepted' | 'rejected'
+  total: string
+  items?: EstimateItem[]
+  created_at: string
+}
+
+/** Mirrors `App\Http\Resources\SettlementResource`. */
+export type Settlement = {
+  id: number
+  mode: 'repair_order' | 'cash'
+  amount: string
+  workshop_org_id: number | null
+  settled_at: string
+}
+
+/** Mirrors `App\Http\Resources\ClaimResource`. */
+export type Claim = {
+  id: number
+  case_id: number
+  case_no?: string | null
+  claimant_party_id: number
+  insurer_org_id: number
+  status: ClaimStatus
+  sla_due_at: string
+  /** Server-computed; negative once the deadline has passed. */
+  sla_seconds_remaining: number
+  sla_breached: boolean
+  created_at: string
+  events?: ClaimEvent[]
+  estimates?: DamageEstimate[]
+  settlement?: Settlement | null
+}
+
 export type CaseClaimSummary = {
   id: number
   claimant_party_id: number

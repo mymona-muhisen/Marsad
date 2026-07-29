@@ -554,6 +554,26 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** The timeline cannot show transitions that leave no timestamp of their own (`under_review` → `adjudication`, for instance), and it cannot show *who* made a transition. A `case_events` table mirroring `claim_events` is the fuller answer if the appeals process later needs a defensible per-transition record; the audit log (Sprint 7) covers decisions and claims but is not citizen-facing.
 
+---
+
+### 2026-07-29 (Sprint 11)
+
+**Decision:** Wired `GET /api/v1/claims` for the claimant and added `case_no` to `ClaimResource` (as a `whenLoaded` field on the `case` relation).
+
+**Reason:** `ClaimService::forClaimant()` had existed since Sprint 6 but was never routed — the insurer got `GET /insurer/claims` while the claimant, who the whole tracking screen is for, could only fetch a claim whose id they already knew. Scoping by claimant party is the same condition `ClaimPolicy::view` applies to a single claim, so the list cannot leak a claim that `show` would refuse. `case_no` is needed because `case_id` is a sequential id that means nothing to a UI, and the tracking screen has to link back to the accident.
+
+**Impact:** This is the third sprint in a row where the citizen-facing index was the missing piece (cases in Sprint 10, claims here). Any remaining role console should be checked for the same gap before its screen is started — the insurer, adjudicator, and regulator indexes all exist, but the assessor/workshop estimate list does not.
+
+---
+
+### 2026-07-29 (Sprint 11)
+
+**Decision:** `ClaimResource` exposes `sla_seconds_remaining` (server-computed, and **allowed to go negative**) plus a `sla_breached` boolean that is false for `settled`/`closed` claims regardless of the deadline. The UI ticks down only while the deadline is in the future; an overdue claim shows a static "X days past".
+
+**Reason:** Same clock-skew reasoning as the objection countdown (Sprint 10), but with a deliberate difference: the objection window floors at zero because an expired window is simply closed, whereas *how far past* the deadline an insurer is, is exactly what a claimant and the regulator's SLA dashboard care about. `sla_breached` mirrors the condition `ClaimService::forOrganization(slaBreached: true)` already uses, so the claimant's screen and the insurer's filtered queue agree on what "breached" means. A live-ticking overdue counter would be theatre — the number that matters is a whole-day count.
+
+**Impact:** Unlike the case timeline, the claim timeline is real recorded history — doc 04 §2.5 logs every mutation to `claim_events` precisely because "status alone loses history" — so nothing on this screen is derived. Reason codes are rendered through i18n with the raw code as `defaultValue`, so an enum added server-side degrades to showing the code rather than a missing-key placeholder in front of a claimant.
+
 ## Template
 
 ### YYYY-MM-DD
