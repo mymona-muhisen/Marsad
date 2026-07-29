@@ -10,8 +10,15 @@
  * with `location_verified = false` so nothing downstream mistakes it for GPS.
  */
 export type Region = {
-  /** Stored in `accident_cases.region` — the heatmap groups on this string. */
   code: string
+  /**
+   * Stored verbatim in `accident_cases.region`. Two things consume it: the
+   * heatmap/black-spot analytics group on it, and `DispatchService` matches it
+   * against `users.zone` for zone-based surveyor routing (FR-C5). The pilot
+   * zone list in `apps/api/config/zones.php` must use these exact strings —
+   * the dispatcher falls back to any free surveyor when nothing matches, so a
+   * mismatch disables zone routing silently rather than failing.
+   */
   ar: string
   en: string
   lat: number

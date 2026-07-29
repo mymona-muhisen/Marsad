@@ -9,7 +9,8 @@ use Illuminate\Database\Seeder;
 class OrganizationSeeder extends Seeder
 {
     /**
-     * Seed the pilot organizations: 2 insurers, 1 regulator, 1 authority, 2 workshops.
+     * Seed the pilot organizations: 2 insurers, 1 regulator, 1 authority,
+     * 2 workshops, 1 assessor office.
      */
     public function run(): void
     {
@@ -20,6 +21,10 @@ class OrganizationSeeder extends Seeder
             ['name_ar' => 'مديرية المرور العامة', 'name_en' => 'Traffic Directorate', 'type' => OrganizationType::Authority, 'license_no' => 'AUTH-001'],
             ['name_ar' => 'ورشة دمشق لتصليح المركبات', 'name_en' => 'Damascus Auto Repair Workshop', 'type' => OrganizationType::Workshop, 'license_no' => 'WS-001'],
             ['name_ar' => 'ورشة الشام للسيارات', 'name_en' => 'Al-Sham Auto Workshop', 'type' => OrganizationType::Workshop, 'license_no' => 'WS-002'],
+            // The `assessor` role is organization-scoped (doc 01 §B.4) but no
+            // assessor office was ever seeded, so an assessor user had nothing
+            // to belong to.
+            ['name_ar' => 'مكتب الخبرة الفنية للمركبات', 'name_en' => 'Vehicle Technical Assessment Office', 'type' => OrganizationType::AssessorOffice, 'license_no' => 'ASM-001'],
         ];
 
         foreach ($organizations as $organization) {

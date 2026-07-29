@@ -11,3 +11,14 @@ parameters:
 
     excludePaths:
         - database/factories/*
+
+    ignoreErrors:
+        # Illuminate\Database\Seeder::$command is documented as non-nullable but
+        # is simply left unset when a seeder is constructed directly instead of
+        # run through `db:seed`. Laravel's own Seeder guards it with isset() for
+        # exactly this reason (framework Seeder.php lines 52, 61, 136), so the
+        # guard is correct and the declared type is what is wrong.
+        -
+            identifier: isset.property
+            path: database/seeders/*
+            message: '#Property Illuminate\\Database\\Seeder::\$command .* in isset\(\) is not nullable#'

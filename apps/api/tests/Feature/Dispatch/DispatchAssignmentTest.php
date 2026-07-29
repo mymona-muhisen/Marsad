@@ -36,10 +36,10 @@ class DispatchAssignmentTest extends TestCase
 
     public function test_assigns_the_least_busy_surveyor_in_the_matching_zone(): void
     {
-        $zoneSurveyor = $this->surveyor('Damascus');
-        $otherZoneSurveyor = $this->surveyor('Aleppo');
+        $zoneSurveyor = $this->surveyor('دمشق');
+        $otherZoneSurveyor = $this->surveyor('حلب');
 
-        $case = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $case = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
 
         $dispatch = $this->app->make(DispatchService::class)->assign($case);
 
@@ -50,9 +50,9 @@ class DispatchAssignmentTest extends TestCase
 
     public function test_falls_back_to_any_surveyor_when_no_zone_match_exists(): void
     {
-        $surveyor = $this->surveyor('Homs');
+        $surveyor = $this->surveyor('حمص');
 
-        $case = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $case = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
 
         $dispatch = $this->app->make(DispatchService::class)->assign($case);
 
@@ -62,16 +62,16 @@ class DispatchAssignmentTest extends TestCase
 
     public function test_prefers_the_surveyor_with_fewer_active_dispatches(): void
     {
-        $busySurveyor = $this->surveyor('Damascus');
-        $freeSurveyor = $this->surveyor('Damascus');
+        $busySurveyor = $this->surveyor('دمشق');
+        $freeSurveyor = $this->surveyor('دمشق');
 
         Dispatch::factory()->create([
             'surveyor_id' => $busySurveyor->id,
-            'zone' => 'Damascus',
+            'zone' => 'دمشق',
             'status' => 'assigned',
         ]);
 
-        $case = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $case = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
 
         $dispatch = $this->app->make(DispatchService::class)->assign($case);
 
@@ -82,7 +82,7 @@ class DispatchAssignmentTest extends TestCase
     {
         Storage::fake('public');
 
-        $surveyor = $this->surveyor('Damascus');
+        $surveyor = $this->surveyor('دمشق');
 
         $reporter = User::factory()->create();
         $vehicle = Vehicle::factory()->create(['owner_id' => $reporter->id]);

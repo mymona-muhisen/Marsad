@@ -20,6 +20,21 @@ class OrganizationSeederTest extends TestCase
         $this->assertSame(1, Organization::where('type', OrganizationType::Regulator->value)->count());
         $this->assertSame(1, Organization::where('type', OrganizationType::Authority->value)->count());
         $this->assertSame(2, Organization::where('type', OrganizationType::Workshop->value)->count());
+        $this->assertSame(1, Organization::where('type', OrganizationType::AssessorOffice->value)->count());
+    }
+
+    public function test_every_organization_type_has_somewhere_to_belong(): void
+    {
+        (new OrganizationSeeder)->run();
+
+        // The org-scoped roles (insurer_agent, insurer_admin, assessor,
+        // workshop) each need an organization of the matching type to exist.
+        foreach (OrganizationType::cases() as $type) {
+            $this->assertTrue(
+                Organization::where('type', $type->value)->exists(),
+                "No organization seeded for type {$type->value}.",
+            );
+        }
     }
 
     public function test_seeding_twice_does_not_duplicate_organizations(): void
@@ -27,6 +42,6 @@ class OrganizationSeederTest extends TestCase
         (new OrganizationSeeder)->run();
         (new OrganizationSeeder)->run();
 
-        $this->assertSame(6, Organization::count());
+        $this->assertSame(7, Organization::count());
     }
 }

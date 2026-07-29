@@ -39,10 +39,10 @@ class DispatchAuthzTest extends TestCase
 
     public function test_surveyor_cannot_accept_another_surveyors_dispatch(): void
     {
-        $ownerSurveyor = $this->surveyor('Damascus');
-        $otherSurveyor = $this->surveyor('Damascus');
+        $ownerSurveyor = $this->surveyor('دمشق');
+        $otherSurveyor = $this->surveyor('دمشق');
 
-        $case = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $case = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
         $dispatch = $this->app->make(DispatchService::class)->assign($case);
         $this->assertSame($ownerSurveyor->id, $dispatch->surveyor_id);
 
@@ -54,10 +54,10 @@ class DispatchAuthzTest extends TestCase
 
     public function test_surveyor_cannot_decline_another_surveyors_dispatch(): void
     {
-        $ownerSurveyor = $this->surveyor('Damascus');
-        $otherSurveyor = $this->surveyor('Damascus');
+        $ownerSurveyor = $this->surveyor('دمشق');
+        $otherSurveyor = $this->surveyor('دمشق');
 
-        $case = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $case = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
         $dispatch = $this->app->make(DispatchService::class)->assign($case);
         $this->assertSame($ownerSurveyor->id, $dispatch->surveyor_id);
 
@@ -70,10 +70,10 @@ class DispatchAuthzTest extends TestCase
 
     public function test_surveyor_only_sees_their_own_dispatches(): void
     {
-        $surveyorA = $this->surveyor('Damascus');
-        $surveyorB = $this->surveyor('Damascus');
+        $surveyorA = $this->surveyor('دمشق');
+        $surveyorB = $this->surveyor('دمشق');
 
-        $caseA = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $caseA = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
         $dispatchService = $this->app->make(DispatchService::class);
         $dispatchA = $dispatchService->assign($caseA);
         $this->assertSame($surveyorA->id, $dispatchA->surveyor_id);
