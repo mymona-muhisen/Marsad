@@ -53,17 +53,17 @@ class AuthorityAnalyticsTest extends TestCase
 
     public function test_black_spots_ranks_regions_by_accident_count(): void
     {
-        AccidentCase::factory()->count(5)->create(['region' => 'Damascus']);
-        AccidentCase::factory()->count(2)->create(['region' => 'Aleppo']);
+        AccidentCase::factory()->count(5)->create(['region' => 'دمشق']);
+        AccidentCase::factory()->count(2)->create(['region' => 'حلب']);
 
         $response = $this->actingAs($this->authorityUser())->getJson('/api/v1/authority/black-spots');
 
         $response->assertOk();
         $data = $response->json('data');
 
-        $this->assertSame('Damascus', $data[0]['region']);
+        $this->assertSame('دمشق', $data[0]['region']);
         $this->assertSame(5, $data[0]['count']);
-        $this->assertSame('Aleppo', $data[1]['region']);
+        $this->assertSame('حلب', $data[1]['region']);
         $this->assertSame(2, $data[1]['count']);
 
         foreach ($data as $row) {

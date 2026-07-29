@@ -21,8 +21,13 @@ class DatabaseSeeder extends Seeder
             PartsPriceSeeder::class,
         ]);
 
+        // Fixed sign-ins and fixture data are development conveniences; a
+        // production database must never carry known accounts.
         if (! app()->isProduction()) {
-            $this->call(DemoSeeder::class);
+            $this->call([
+                DemoUserSeeder::class,
+                DemoSeeder::class,
+            ]);
         }
     }
 }

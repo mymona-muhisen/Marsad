@@ -30,11 +30,11 @@ class DispatchEvidenceTest extends TestCase
 
     private function dispatchedCase(): Dispatch
     {
-        $surveyor = User::factory()->inZone('Damascus')->create();
+        $surveyor = User::factory()->inZone('دمشق')->create();
         $surveyor->assignRole(RoleName::Surveyor->value);
 
         $case = AccidentCase::factory()->create([
-            'region' => 'Damascus',
+            'region' => 'دمشق',
             'status' => CaseStatus::UnderReview->value,
             'track' => CaseTrack::DispatchRequired->value,
         ]);

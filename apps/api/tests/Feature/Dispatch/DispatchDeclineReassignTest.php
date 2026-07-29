@@ -33,10 +33,10 @@ class DispatchDeclineReassignTest extends TestCase
 
     public function test_declining_reassigns_to_a_different_surveyor_and_keeps_full_history(): void
     {
-        $firstSurveyor = $this->surveyor('Damascus');
-        $secondSurveyor = $this->surveyor('Damascus');
+        $firstSurveyor = $this->surveyor('دمشق');
+        $secondSurveyor = $this->surveyor('دمشق');
 
-        $case = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $case = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
         $dispatchService = $this->app->make(DispatchService::class);
 
         $firstDispatch = $dispatchService->assign($case);
@@ -67,8 +67,8 @@ class DispatchDeclineReassignTest extends TestCase
 
     public function test_decline_requires_a_reason(): void
     {
-        $surveyor = $this->surveyor('Damascus');
-        $case = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $surveyor = $this->surveyor('دمشق');
+        $case = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
         $dispatch = $this->app->make(DispatchService::class)->assign($case);
 
         $this->actingAs($surveyor)
@@ -79,9 +79,9 @@ class DispatchDeclineReassignTest extends TestCase
 
     public function test_declined_surveyor_is_not_reassigned_the_same_case(): void
     {
-        $onlySurveyor = $this->surveyor('Damascus');
+        $onlySurveyor = $this->surveyor('دمشق');
 
-        $case = AccidentCase::factory()->create(['region' => 'Damascus', 'track' => CaseTrack::DispatchRequired->value]);
+        $case = AccidentCase::factory()->create(['region' => 'دمشق', 'track' => CaseTrack::DispatchRequired->value]);
         $dispatchService = $this->app->make(DispatchService::class);
 
         $dispatch = $dispatchService->assign($case);

@@ -32,13 +32,26 @@ class DemoSeeder extends Seeder
 {
     private int $adjudicatorId;
 
+    private User $citizen;
+
     public function run(): void
     {
         $insurer = Organization::query()->where('type', OrganizationType::Insurer->value)->first()
             ?? Organization::factory()->create(['type' => OrganizationType::Insurer->value]);
 
-        $adjudicator = User::factory()->create(['full_name' => 'أحمد المحكّم']);
-        $adjudicator->assignRole(RoleName::Adjudicator->value);
+        // Hang the fixtures off the fixed demo sign-ins rather than throwaway
+        // factory users, so signing in as the demo citizen actually shows a
+        // case in every lifecycle state instead of an empty list.
+        $this->citizen = $this->demoUser(DemoUserSeeder::CITIZEN_PHONE)
+            ?? User::factory()->create(['full_name' => 'مواطن تجريبي']);
+
+        $adjudicator = $this->demoUser(DemoUserSeeder::ADJUDICATOR_PHONE);
+
+        if (! $adjudicator) {
+            $adjudicator = User::factory()->create(['full_name' => 'أحمد المحكّم']);
+            $adjudicator->assignRole(RoleName::Adjudicator->value);
+        }
+
         $this->adjudicatorId = $adjudicator->id;
 
         foreach (CaseStatus::cases() as $status) {
@@ -50,9 +63,15 @@ class DemoSeeder extends Seeder
         }
     }
 
+    /** Null when DemoUserSeeder has not run — the fixtures still work without it. */
+    private function demoUser(string $phone): ?User
+    {
+        return User::query()->where('phone', $phone)->first();
+    }
+
     private function makeCaseInState(CaseStatus $status): AccidentCase
     {
-        $reporter = User::factory()->create();
+        $reporter = $this->citizen;
         $vehicle = Vehicle::factory()->create(['owner_id' => $reporter->id]);
 
         $noTrackYet = in_array($status, [CaseStatus::Draft, CaseStatus::Cancelled], true);
@@ -120,7 +139,7 @@ class DemoSeeder extends Seeder
 
     private function makeClaimInState(ClaimStatus $status, Organization $insurer): Claim
     {
-        $reporter = User::factory()->create();
+        $reporter = $this->citizen;
         $vehicle = Vehicle::factory()->create(['owner_id' => $reporter->id]);
 
         $case = AccidentCase::factory()->create([

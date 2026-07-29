@@ -574,6 +574,26 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** Unlike the case timeline, the claim timeline is real recorded history — doc 04 §2.5 logs every mutation to `claim_events` precisely because "status alone loses history" — so nothing on this screen is derived. Reason codes are rendered through i18n with the raw code as `defaultValue`, so an enum added server-side degrades to showing the code rather than a missing-key placeholder in front of a claimant.
 
+---
+
+### 2026-07-29 (Sprint 11 — regression fix)
+
+**Decision:** `config/zones.php` now lists the pilot zones in Arabic (`دمشق`, `حلب`, `حمص`) instead of English. Added `config/regions.php` as the canonical server-side governorate vocabulary, plus `ZoneVocabularyTest` asserting the pilot zones are a subset of it and `regions.test.ts` pinning the frontend list to the same strings.
+
+**Reason:** Sprint 9's location step began writing the Arabic governorate name into `accident_cases.region`, while the zone list still said `Damascus`. `DispatchService::pickSurveyor()` compares `users.zone` to `accident_cases.region` with plain equality and **falls back to any free surveyor when nothing matches** — so zone-based routing (FR-C5) stopped working for every self-reported case without a single test failing or a line appearing in a log. The existing dispatch tests could not catch it: they set both sides to the same literal, so they pass under any vocabulary at all. Those literals have been changed to the real zone names so the suite exercises the actual vocabulary.
+
+**Impact:** The two lists are now duplicated across languages and pinned by a test on each side, which catches an edit to one but not a coordinated-yet-wrong edit to both. Serving the governorate list from an endpoint and having the wizard cache it is the real fix; it was not done here because the wizard must work offline, so the list has to ship in the bundle regardless. Any future column matched across the PHP/TS boundary by string equality deserves the same treatment — a silent fallback is what makes this class of bug invisible.
+
+---
+
+### 2026-07-29 (Sprint 11)
+
+**Decision:** Added `DemoUserSeeder` — one fixed sign-in per role (`0900000001`–`0900000013`), organization-scoped where the role requires it, seeded only outside production. `DemoSeeder` now hangs its fixtures off the demo citizen and adjudicator instead of throwaway factory users. Also added the missing `assessor_office` organization.
+
+**Reason:** Trying the platform as anyone but a citizen meant assigning roles by hand in tinker after every `migrate:fresh` — the OTP flow grants `citizen` to new users and nothing else, and the admin console that would hand out roles is itself unbuilt. Previously the fixtures were owned by random factory users, so even a correctly-roled account landed on empty screens; the demo citizen now owns a case in all 12 lifecycle states and a claim in all 8 statuses. `OrganizationType::AssessorOffice` existed in the enum but no organization of that type was ever seeded, so an `assessor` user had nothing to belong to.
+
+**Impact:** These are not credentials — sign-in is still phone + OTP with a random code, and the seeder never runs in production. The seeder uses `syncRoles` rather than `assignRole` so re-seeding neither stacks role rows nor leaves a hand-removed role missing. `phpstan.neon` gained one scoped ignore: `Seeder::$command` is documented non-nullable but is genuinely unset when a seeder is constructed directly, and Laravel's own `Seeder` guards it with `isset` for that reason.
+
 ## Template
 
 ### YYYY-MM-DD

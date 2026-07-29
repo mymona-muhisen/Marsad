@@ -57,6 +57,31 @@ Run checks:
 npm run check    # eslint + typecheck + vitest
 ```
 
+## Demo sign-ins (dev only)
+
+`migrate:fresh --seed` creates one account per role and prints the table. Sign in at `/login` with
+the phone, then read the OTP out of `storage/logs/laravel.log` (or run `php artisan pail` to watch
+it live). These are seeded only when the app is **not** in production.
+
+| Phone | Role | | Phone | Role |
+|---|---|---|---|---|
+| `0900000001` | citizen — owns all the demo cases and claims | | `0900000008` | workshop |
+| `0900000002` | surveyor (zoned to دمشق) | | `0900000009` | regulator |
+| `0900000003` | adjudicator | | `0900000010` | authority |
+| `0900000004` | senior_adjudicator | | `0900000011` | call_center |
+| `0900000005` | insurer_agent | | `0900000012` | admin |
+| `0900000006` | insurer_admin | | `0900000013` | super_admin |
+| `0900000007` | assessor | | | |
+
+The citizen account owns a case in every one of the 12 lifecycle states and a claim in every one of
+the 8 claim statuses, so the citizen screens are populated rather than empty. Note that only the
+citizen screens (cases, claims, vehicles, the reporting wizard) are built — the other roles reach
+guarded routes that still render a placeholder.
+
+The fixed phone is not a credential: sign-in is still phone + OTP, and the code is random. What it
+buys you is an account that already holds a role and an organization, since the admin console that
+would otherwise grant them is unbuilt.
+
 ## Notes
 
 - OTP codes are sent through a log-only `SmsGateway` adapter in dev (see `storage/logs/laravel.log`
