@@ -13,6 +13,10 @@ import { ReviewCasePage } from '@/features/adjudication/ReviewCasePage'
 import { InsurerClaimDetailPage } from '@/features/insurer/InsurerClaimDetailPage'
 import { InsurerClaimsPage } from '@/features/insurer/InsurerClaimsPage'
 import { InsurerPoliciesPage } from '@/features/insurer/InsurerPoliciesPage'
+import { BlackSpotsPage } from '@/features/dashboards/BlackSpotsPage'
+import { DensityPage } from '@/features/dashboards/DensityPage'
+import { FraudFlagsPage } from '@/features/dashboards/FraudFlagsPage'
+import { SlaReportPage } from '@/features/dashboards/SlaReportPage'
 import { HomePage } from '@/features/home/HomePage'
 import { PlaceholderSection } from '@/features/home/PlaceholderSection'
 import { SECTIONS } from '@/features/home/sections'
@@ -31,6 +35,10 @@ const SECTION_SCREENS: Record<string, ReactElement> = {
   adjudicationQueue: <QueuePage />,
   insurerClaims: <InsurerClaimsPage />,
   insurerPolicies: <InsurerPoliciesPage />,
+  slaReport: <SlaReportPage />,
+  fraudFlags: <FraudFlagsPage />,
+  heatmap: <DensityPage />,
+  blackSpots: <BlackSpotsPage />,
 }
 
 /**

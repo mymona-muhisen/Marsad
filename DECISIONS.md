@@ -664,6 +664,46 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** Three components are now shared across two role-facing features, so a change to the timeline or the deviation flag lands on both consoles at once — which is the point, but it means neither can be restyled independently without a prop.
 
+---
+
+### 2026-07-30 (Sprint 14)
+
+**Decision:** Every chart on the four dashboards uses a single sequential hue stepped from the brand blue — no categorical palette anywhere. The five light steps and five dark steps are separate selections, each run through the palette validator against its own surface rather than derived by inverting the other.
+
+**Reason:** All four datasets encode magnitude of one quantity — breach rate per insurer, accidents per bucket, accidents per governorate, signals per day. None of them is a set of distinct series, so categorical hues would imply a difference in kind that the data does not contain. The validator caught a real defect: the first light ramp failed the ordinal 2:1 floor at its light end (`#c9dcee` measured 1.33:1 on `#f7f9fb`), meaning the smallest bars would have dissolved into the surface. Re-stepping to `#8fb4d4` (2.06:1) passed. The dark ramp failed the same check at `#1e4a72` (1.94:1) and was re-stepped to `#24547e` (2.25:1).
+
+**Impact:** Steps live as `--seq-1..5` in `index.css` with the measured contrast recorded in a comment; moving either end obliges a re-run of `validate_palette.js --ordinal` against the matching surface. Bars are also directly labelled and every chart has a table view, so no reading depends on colour.
+
+---
+
+### 2026-07-30 (Sprint 14)
+
+**Decision:** The authority heatmap renders as a density plot with no base map, and the page says so in as many words.
+
+**Reason:** `AccidentAnalyticsService::heatmap()` returns coordinate buckets, and plotting them on a real map needs an external tile provider — which this platform avoids by design, and which the offline-tolerance constraint makes worse. Drawing the buckets in a map-shaped frame without a map would imply geographic context that isn't there; a reader would take the empty space for terrain. Positioning by lat/lng within the data's own bounds is what the data actually supports, so that is what it claims to be. The black-spots ranking beside it is the actionable geographic view, and it needs no tiles.
+
+**Impact:** A regulator cannot see accidents against roads or districts, which is the point of a heatmap for road-safety work. Wiring a tile provider is the follow-up; the plot component takes the same bucket array, so it is a swap rather than a rewrite.
+
+---
+
+### 2026-07-30 (Sprint 14)
+
+**Decision:** Fraud reasons render as a table, not a bar chart. The SLA screen flags only the worst insurer, and only when its breach count is above zero.
+
+**Reason:** One reason code exists in the system today (`duplicate_photo_hash`), and a one-bar bar chart invites a comparison against nothing; the table degrades correctly when more codes appear. On the SLA screen, painting a bar red is an accusation — doing it to a company with zero breaches because it happens to sort first would be a claim the data does not make. The flag also carries a written label rather than relying on the colour.
+
+**Impact:** Both choices are guarded by tests, including one asserting that nobody is flagged when nobody has breached. An unmapped reason code falls back to its raw string rather than a missing-key placeholder, so a server-side enum addition degrades visibly instead of silently.
+
+---
+
+### 2026-07-30 (Sprint 14)
+
+**Decision:** The hand-rolled SVG charts are covered by geometry tests asserting plotted coordinates stay inside the viewBox, including the single-point and all-zero cases.
+
+**Reason:** The palette validator checks colour, not layout, and the skill's final step is to render the chart and look at it. No browser or screenshot tool is available in this environment, so that step could not be performed as written. Asserting the geometry programmatically covers the specific failure this code is prone to — a division by zero when a series has one point or a flat-zero span, which silently produces `NaN` coordinates and an invisible chart. A flat-zero fraud series is the ordinary case, not an edge case.
+
+**Impact:** Visual review is still outstanding: label collision, RTL mirroring of the time axis, and dark-mode rendering have been reasoned about but not seen. Anyone with a browser to hand should open the four screens before this is shown to an examiner.
+
 ## Template
 
 ### YYYY-MM-DD

@@ -246,6 +246,89 @@
     }
   },
 
+  "dashboards": {
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "track": "Track",
+      "allTracks": "All tracks",
+      "days": "Period",
+      "dayOptions": {
+        "7": "Last 7 days",
+        "30": "Last 30 days",
+        "90": "Last 90 days"
+      },
+      "clear": "Clear filters"
+    },
+    "tableView": "View as a table",
+    "aggregateOnly": "These figures are aggregates only — no case numbers and no party data.",
+
+    "sla": {
+      "title": "Insurer deadline compliance",
+      "subtitle": "Per company: how many claims, how many past the deadline, and the average time to settle.",
+      "empty": "No claims yet.",
+      "totalClaims": "Total claims",
+      "totalBreached": "Past deadline",
+      "breachRate": "Breach rate",
+      "avgSettlement": "Average time to settle",
+      "hours": "hours",
+      "insurers": "companies",
+      "breachByInsurer": "Breach rate by company",
+      "breachRateOf": "{{breached}} of {{total}}",
+      "worstOffender": "Highest breach rate",
+      "noSettlements": "No settlements yet",
+      "table": {
+        "insurer": "Company",
+        "claims": "Claims",
+        "breached": "Breached",
+        "rate": "Rate",
+        "avgHours": "Avg hours"
+      }
+    },
+
+    "fraud": {
+      "title": "Fraud signals",
+      "subtitle": "Signals the system raised automatically. Aggregate counts, no case detail.",
+      "total": "Total signals",
+      "inPeriod": "in the selected period",
+      "trend": "Signals per day",
+      "trendEmpty": "No signals in this period.",
+      "byReason": "By reason",
+      "reasonsEmpty": "No signals recorded.",
+      "reasons": {
+        "duplicate_photo_hash": "The same photo hash across different cases"
+      },
+      "reasonTable": {
+        "reason": "Reason",
+        "count": "Count"
+      }
+    },
+
+    "density": {
+      "title": "Accident density",
+      "subtitle": "Accidents grouped into coordinate buckets of roughly 1.1km.",
+      "empty": "No accidents match these filters.",
+      "notAMap": "This is a density plot, not a map: points sit at their coordinates within the data's own bounds, with no base map. A real map view needs an external tile provider.",
+      "buckets": "buckets",
+      "accidents": "accidents",
+      "busiest": "Busiest bucket",
+      "bucketLabel": "Bucket",
+      "table": {
+        "lat": "Latitude",
+        "lng": "Longitude",
+        "count": "Accidents"
+      }
+    },
+
+    "blackSpots": {
+      "title": "Black spots",
+      "subtitle": "The governorates recording the most accidents, ranked.",
+      "empty": "No data matches these filters.",
+      "count": "accidents",
+      "topRegion": "Most accidents"
+    }
+  },
+
   "insurer": {
     "claims": {
       "title": "Incoming claims",
