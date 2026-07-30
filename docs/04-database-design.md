@@ -107,6 +107,7 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | Column | Type | Constraints |
 |---|---|---|
 | **case_no** | CHAR(12) | **UQ** — format `MC-YY-XXXXXX`, random suffix (G2) |
+| idempotency_key | UUID | nullable, `UQ(reported_by, idempotency_key)` — client-generated; a retried `POST /cases` after a dropped connection returns the original case instead of filing a second accident. `evidence_items.idempotency_key` cannot cover this: it dedups *within* a case, and a retry creates a new one |
 | **reported_by** | FK → users | RESTRICT |
 | **channel** | VARCHAR(20) | CK: self, hotline, surveyor |
 | **status** | VARCHAR(30) | CK: 12 states (draft, submitted, under_review, awaiting_counterparty, evidence_complete, adjudication, decision_issued, objection_window, final, closed, cancelled, escalated) · default draft |

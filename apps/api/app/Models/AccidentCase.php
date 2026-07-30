@@ -26,6 +26,7 @@ class AccidentCase extends Model
 
     protected $fillable = [
         'case_no',
+        'idempotency_key',
         'reported_by',
         'channel',
         'status',

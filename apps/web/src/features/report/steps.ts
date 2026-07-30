@@ -96,6 +96,25 @@ export function collectPhotos({ photos, extraPhotos }: StepState): File[] {
   return [...guided, ...extraPhotos]
 }
 
+/**
+ * The idempotency keys for `collectPhotos`, in exactly the same order.
+ *
+ * Built from the same slot list and the same filter, so a slot without a photo
+ * drops its key too and the two arrays stay index-aligned — the API zips them
+ * together, and a misalignment would attach a key to the wrong file.
+ */
+export function collectPhotoKeys(
+  { photos, extraPhotos }: StepState,
+  photoKeys: Record<string, string>,
+  extraPhotoKeys: string[],
+): string[] {
+  const guided = PHOTO_SLOTS.filter((slot) => photos[slot] instanceof File).map(
+    (slot) => photoKeys[slot],
+  )
+
+  return [...guided, ...extraPhotoKeys.slice(0, extraPhotos.length)]
+}
+
 /** True when every step up to and including `step` passes validation. */
 export function canReachStep(step: WizardStep, state: StepState): boolean {
   const target = WIZARD_STEPS.indexOf(step)

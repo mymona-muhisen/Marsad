@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/Button'
 import { ApiError } from '@/lib/api/errors'
 import type { AccidentCase } from '@/lib/api/types'
 import { findRegion } from '@/lib/regions'
+import { newIdempotencyKey } from '@/lib/idempotency'
 import { createCase } from './api'
 import {
-  EMPTY_DRAFT,
   clearDraft,
   hasDraft,
   loadDraft,
@@ -23,6 +23,7 @@ import {
   PHOTO_SLOTS,
   WIZARD_STEPS,
   collectPhotos,
+  collectPhotoKeys,
   validateStep,
   type PhotoSlot,
   type WizardStep,
@@ -79,14 +80,29 @@ export function ReportWizard() {
     }
   }, [])
 
-  const patchDraft = useCallback((patch: Partial<ReportDraft>) => {
-    setDraft((current) => {
-      const next = { ...current, ...patch }
-      saveDraft(next)
-      return next
-    })
-    setError(null)
-  }, [])
+  /**
+   * Accepts a callback as well as a plain patch: the idempotency keys have to
+   * be derived from the current draft (mint only if this slot has none), which
+   * a plain object cannot express without reading stale state.
+   */
+  const patchDraft = useCallback(
+    (
+      patch:
+        | Partial<ReportDraft>
+        | ((current: ReportDraft) => Partial<ReportDraft>),
+    ) => {
+      setDraft((current) => {
+        const next = {
+          ...current,
+          ...(typeof patch === 'function' ? patch(current) : patch),
+        }
+        saveDraft(next)
+        return next
+      })
+      setError(null)
+    },
+    [],
+  )
 
   /**
    * Slots are persisted positionally, so a missing slot has to occupy its index
@@ -111,9 +127,21 @@ export function ReportWizard() {
         persistPhotos(next, extraPhotos)
         return next
       })
+      // Minted once per slot and then left alone: retaking a photo reuses the
+      // slot's key, so a retry after a partial upload still dedups server-side.
+      patchDraft((current) =>
+        current.photoKeys[slot]
+          ? {}
+          : {
+              photoKeys: {
+                ...current.photoKeys,
+                [slot]: newIdempotencyKey(),
+              },
+            },
+      )
       setError(null)
     },
-    [extraPhotos, persistPhotos],
+    [extraPhotos, persistPhotos, patchDraft],
   )
 
   const addExtra = useCallback(
@@ -123,8 +151,11 @@ export function ReportWizard() {
         persistPhotos(photos, next)
         return next
       })
+      patchDraft((current) => ({
+        extraPhotoKeys: [...current.extraPhotoKeys, newIdempotencyKey()],
+      }))
     },
-    [photos, persistPhotos],
+    [photos, persistPhotos, patchDraft],
   )
 
   const removeExtra = useCallback(
@@ -134,8 +165,12 @@ export function ReportWizard() {
         persistPhotos(photos, next)
         return next
       })
+      // Drop the matching key so the arrays stay index-aligned.
+      patchDraft((current) => ({
+        extraPhotoKeys: current.extraPhotoKeys.filter((_, i) => i !== index),
+      }))
     },
-    [photos, persistPhotos],
+    [photos, persistPhotos, patchDraft],
   )
 
   const goToStep = useCallback(
@@ -204,6 +239,10 @@ export function ReportWizard() {
       injuryFlag: draft.injuryFlag === true,
       statement: draft.statement.trim(),
       photos: collectPhotos(state),
+      // Both keys ride with the submit and are unchanged by a retry: the case
+      // key stops a duplicate accident, the photo keys stop duplicate evidence.
+      idempotencyKey: draft.idempotencyKey,
+      photoKeys: collectPhotoKeys(state, draft.photoKeys, draft.extraPhotoKeys),
       hitAndRun: draft.hitAndRun,
       counterpartyPhone: draft.hitAndRun ? undefined : draft.counterpartyPhone,
       counterpartyPlate: draft.hitAndRun
@@ -215,7 +254,9 @@ export function ReportWizard() {
   const startOver = () => {
     clearDraft()
     void clearPhotos()
-    setDraft({ ...EMPTY_DRAFT })
+    // A new report is a new accident: loadDraft mints a fresh key rather than
+    // reusing one the server may already have seen.
+    setDraft(loadDraft())
     setPhotos({})
     setExtraPhotos([])
     setError(null)

@@ -16,6 +16,10 @@ export type CreateCaseInput = {
   hitAndRun: boolean
   counterpartyPhone?: string
   counterpartyPlate?: string
+  /** Survives reloads and retries — see `lib/idempotency.ts`. */
+  idempotencyKey?: string
+  /** One per photo, in the same order as `photos`. */
+  photoKeys?: string[]
 }
 
 /** Laravel's `boolean` rule accepts "1"/"0"; FormData can only carry strings. */
@@ -50,8 +54,20 @@ export function buildCaseFormData(input: CreateCaseInput): FormData {
     form.set('counterparty_plate', input.counterpartyPlate)
   }
 
+  if (input.idempotencyKey) {
+    form.set('idempotency_key', input.idempotencyKey)
+  }
+
   for (const photo of input.photos) {
     form.append('photos[]', photo, photo.name)
+  }
+
+  // Appended as a parallel array: the API zips it against `photos` by index,
+  // so the two must be sent in the same order and never partially.
+  if (input.photoKeys && input.photoKeys.length === input.photos.length) {
+    for (const key of input.photoKeys) {
+      form.append('idempotency_keys[]', key)
+    }
   }
 
   return form

@@ -1,3 +1,5 @@
+import { isIdempotencyKey, newIdempotencyKey } from '@/lib/idempotency'
+
 const DRAFT_KEY = 'marsad.report.draft'
 
 /**
@@ -35,6 +37,18 @@ export type ReportDraft = {
   statement: string
   /** Furthest step reached, so a reload resumes where the user stopped. */
   step: number
+  /**
+   * Minted with the draft and kept until it is submitted. A retry after a
+   * dropped connection carries the same key, so the API returns the case the
+   * first attempt already created instead of filing the accident twice.
+   */
+  idempotencyKey: string
+  /**
+   * One key per photo, by slot, plus one per extra. Parallel to the order
+   * `collectPhotos` produces, which is the order the API zips them against.
+   */
+  photoKeys: Record<string, string>
+  extraPhotoKeys: string[]
 }
 
 export const EMPTY_DRAFT: ReportDraft = {
@@ -51,6 +65,9 @@ export const EMPTY_DRAFT: ReportDraft = {
   counterpartyPlate: '',
   statement: '',
   step: 0,
+  idempotencyKey: '',
+  photoKeys: {},
+  extraPhotoKeys: [],
 }
 
 function isDraftShaped(value: unknown): value is Partial<ReportDraft> {
@@ -62,17 +79,24 @@ function isDraftShaped(value: unknown): value is Partial<ReportDraft> {
  * older build must never leave the wizard holding undefined fields, so unknown
  * or missing keys fall back to the empty draft's values.
  */
+/** A draft always carries a key; a fresh or corrupted one gets a new mint. */
+function withKey(draft: ReportDraft): ReportDraft {
+  return isIdempotencyKey(draft.idempotencyKey)
+    ? draft
+    : { ...draft, idempotencyKey: newIdempotencyKey() }
+}
+
 export function loadDraft(): ReportDraft {
   try {
     window.localStorage.removeItem(LEGACY_DRAFT_KEY)
 
     const raw = window.localStorage.getItem(DRAFT_KEY)
-    if (!raw) return { ...EMPTY_DRAFT }
+    if (!raw) return withKey({ ...EMPTY_DRAFT })
 
     const parsed: unknown = JSON.parse(raw)
-    if (!isDraftShaped(parsed)) return { ...EMPTY_DRAFT }
+    if (!isDraftShaped(parsed)) return withKey({ ...EMPTY_DRAFT })
 
-    return {
+    return withKey({
       ...EMPTY_DRAFT,
       ...Object.fromEntries(
         Object.entries(parsed).filter(([key, value]) => {
@@ -82,9 +106,9 @@ export function loadDraft(): ReportDraft {
           return value === null || typeof value === typeof expected || expected === null
         }),
       ),
-    }
+    })
   } catch {
-    return { ...EMPTY_DRAFT }
+    return withKey({ ...EMPTY_DRAFT })
   }
 }
 

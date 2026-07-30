@@ -1,8 +1,26 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { EMPTY_DRAFT, clearDraft, hasDraft, loadDraft, saveDraft } from './draft'
+import {
+  EMPTY_DRAFT,
+  clearDraft,
+  hasDraft,
+  loadDraft,
+  saveDraft,
+  type ReportDraft,
+} from './draft'
 
 const KEY = 'marsad.report.draft'
+
+/**
+ * A loaded draft always carries a freshly-minted idempotency key, so it never
+ * equals EMPTY_DRAFT verbatim. Compare everything else, and assert the key
+ * separately where it matters.
+ */
+const withoutKey = (draft: ReportDraft) => {
+  const rest: Partial<ReportDraft> = { ...draft }
+  delete rest.idempotencyKey
+  return rest
+}
 
 afterEach(() => window.localStorage.clear())
 
@@ -23,25 +41,34 @@ describe('report draft', () => {
 
     saveDraft(draft)
 
-    expect(loadDraft()).toEqual(draft)
+    expect(withoutKey(loadDraft())).toEqual(withoutKey(draft))
     expect(hasDraft()).toBe(true)
   })
 
+  it('round-trips the idempotency key, which is the retry contract', () => {
+    const key = '11111111-1111-4111-8111-111111111111'
+    saveDraft({ ...EMPTY_DRAFT, idempotencyKey: key })
+
+    // A reload after a crash has to resubmit under the original key, or the
+    // server sees a brand-new report and files the accident twice.
+    expect(loadDraft().idempotencyKey).toBe(key)
+  })
+
   it('returns an empty draft when nothing is stored', () => {
-    expect(loadDraft()).toEqual(EMPTY_DRAFT)
+    expect(withoutKey(loadDraft())).toEqual(withoutKey(EMPTY_DRAFT))
     expect(hasDraft()).toBe(false)
   })
 
   it('survives a corrupted entry instead of crashing the wizard', () => {
     window.localStorage.setItem(KEY, '{not json')
 
-    expect(loadDraft()).toEqual(EMPTY_DRAFT)
+    expect(withoutKey(loadDraft())).toEqual(withoutKey(EMPTY_DRAFT))
   })
 
   it('ignores a stored array', () => {
     window.localStorage.setItem(KEY, '[1,2,3]')
 
-    expect(loadDraft()).toEqual(EMPTY_DRAFT)
+    expect(withoutKey(loadDraft())).toEqual(withoutKey(EMPTY_DRAFT))
   })
 
   it('fills gaps left by a draft written by an older build', () => {
@@ -77,6 +104,6 @@ describe('report draft', () => {
     clearDraft()
 
     expect(hasDraft()).toBe(false)
-    expect(loadDraft()).toEqual(EMPTY_DRAFT)
+    expect(withoutKey(loadDraft())).toEqual(withoutKey(EMPTY_DRAFT))
   })
 })
