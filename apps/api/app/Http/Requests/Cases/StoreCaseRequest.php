@@ -35,6 +35,11 @@ class StoreCaseRequest extends FormRequest
             'voice_statement' => ['nullable', 'file', 'mimes:mp3,wav,m4a,ogg', 'max:10240', 'required_without:statement'],
             'photos' => ['required', 'array', 'min:4'],
             'photos.*' => ['file', 'mimes:jpg,jpeg,png', 'max:5120'],
+            // Offline tolerance: a retried submit after a dropped connection
+            // must return the original case, not file a second accident.
+            'idempotency_key' => ['nullable', 'uuid'],
+            'idempotency_keys' => ['nullable', 'array'],
+            'idempotency_keys.*' => ['nullable', 'uuid'],
             'hit_and_run' => ['boolean'],
             'counterparty_vehicle_id' => ['nullable', 'integer', 'exists:vehicles,id'],
             'counterparty_plate' => ['nullable', 'string', 'max:20'],

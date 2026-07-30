@@ -36,8 +36,24 @@ class CaseService
     {
         $reporterVehicle = Vehicle::findOrFail($data['vehicle_id']);
 
+        // A retry after a dropped connection must return the case the first
+        // attempt already created — not file the same accident twice, and not
+        // send the counterparty a second SMS. Checked before anything is
+        // written, so a replay is a pure read.
+        if (! empty($data['idempotency_key'])) {
+            $existing = AccidentCase::query()
+                ->where('reported_by', $reporter->id)
+                ->where('idempotency_key', $data['idempotency_key'])
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+        }
+
         $case = AccidentCase::create([
             'case_no' => $this->generateCaseNo(),
+            'idempotency_key' => $data['idempotency_key'] ?? null,
             'reported_by' => $reporter->id,
             'channel' => CaseChannel::Self,
             'status' => CaseStatus::Draft,
@@ -59,7 +75,7 @@ class CaseService
             'statement_text' => $data['statement'] ?? null,
         ]);
 
-        $this->evidence->storePhotos($case, $reporterParty, $reporter, $photos, (float) $case->lat, (float) $case->lng);
+        $this->evidence->storePhotos($case, $reporterParty, $reporter, $photos, (float) $case->lat, (float) $case->lng, $data['idempotency_keys'] ?? []);
 
         if ($voiceStatement) {
             $this->evidence->storeOne($case, $reporterParty, $reporter, EvidenceType::Voice, $voiceStatement, (float) $case->lat, (float) $case->lng);
@@ -164,7 +180,7 @@ class CaseService
             'join_token_expires_at' => null,
         ])->save();
 
-        $this->evidence->storePhotos($case, $counterpartyParty, $joiningUser, $photos, (float) $case->lat, (float) $case->lng);
+        $this->evidence->storePhotos($case, $counterpartyParty, $joiningUser, $photos, (float) $case->lat, (float) $case->lng, $data['idempotency_keys'] ?? []);
 
         if ($voiceStatement) {
             $this->evidence->storeOne($case, $counterpartyParty, $joiningUser, EvidenceType::Voice, $voiceStatement, (float) $case->lat, (float) $case->lng);

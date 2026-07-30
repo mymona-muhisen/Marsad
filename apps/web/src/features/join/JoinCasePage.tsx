@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/Textarea'
 import { useAuth } from '@/features/auth/useAuth'
 import { PhotosStep } from '@/features/report/steps/PhotosStep'
 import { PHOTO_SLOTS, type PhotoSlot } from '@/features/report/steps'
+import { newIdempotencyKey } from '@/lib/idempotency'
 import { ApiError } from '@/lib/api/errors'
 import { formatDateTime } from '@/lib/format'
 import { useLocale } from '@/i18n/useLocale'
@@ -38,6 +39,13 @@ export function JoinCasePage() {
   const [step, setStep] = useState<Step>('photos')
   const [photos, setPhotos] = useState<Partial<Record<PhotoSlot, File>>>({})
   const [extraPhotos, setExtraPhotos] = useState<File[]>([])
+  /**
+   * Minted per slot on first capture and reused on a retake, so a retried
+   * submit after a dropped connection dedups against the same evidence rows.
+   * In memory only — this flow is two steps against a 24h token, not a draft.
+   */
+  const [photoKeys, setPhotoKeys] = useState<Record<string, string>>({})
+  const [extraKeys, setExtraKeys] = useState<string[]>([])
   const [statement, setStatement] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [joinedCaseNo, setJoinedCaseNo] = useState<string | null>(null)
@@ -51,15 +59,20 @@ export function JoinCasePage() {
 
   const setSlot = useCallback((slot: PhotoSlot, file: File) => {
     setPhotos((current) => ({ ...current, [slot]: file }))
+    setPhotoKeys((current) =>
+      current[slot] ? current : { ...current, [slot]: newIdempotencyKey() },
+    )
     setError(null)
   }, [])
 
   const addExtra = useCallback((file: File) => {
     setExtraPhotos((current) => [...current, file])
+    setExtraKeys((current) => [...current, newIdempotencyKey()])
   }, [])
 
   const removeExtra = useCallback((index: number) => {
     setExtraPhotos((current) => current.filter((_, i) => i !== index))
+    setExtraKeys((current) => current.filter((_, i) => i !== index))
   }, [])
 
   const mutation = useMutation({
@@ -203,11 +216,18 @@ export function JoinCasePage() {
   }
 
   const allSlotsFilled = PHOTO_SLOTS.every((slot) => photos[slot])
+  const filledSlots = PHOTO_SLOTS.filter(
+    (slot) => photos[slot] instanceof File,
+  )
   const orderedPhotos = [
-    ...PHOTO_SLOTS.map((slot) => photos[slot]).filter(
-      (file): file is File => file instanceof File,
-    ),
+    ...filledSlots.map((slot) => photos[slot] as File),
     ...extraPhotos,
+  ]
+  // Built from the same slot list in the same order, so the two arrays the API
+  // zips together can never drift apart.
+  const orderedKeys = [
+    ...filledSlots.map((slot) => photoKeys[slot]),
+    ...extraKeys.slice(0, extraPhotos.length),
   ]
 
   const goToStatement = () => {
@@ -232,7 +252,12 @@ export function JoinCasePage() {
     }
 
     setError(null)
-    mutation.mutate({ token, statement: trimmed, photos: orderedPhotos })
+    mutation.mutate({
+      token,
+      statement: trimmed,
+      photos: orderedPhotos,
+      photoKeys: orderedKeys,
+    })
   }
 
   return (

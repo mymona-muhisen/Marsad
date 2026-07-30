@@ -760,6 +760,20 @@ The reference is random (`REC-YYMMDD-XXXXXX`), not derived from the settlement i
 
 PHPStan caught that `Settlement::$mode` had no `@property` annotation, so `->mode->value` was unverifiable even though the cast was correct; the annotation was added to the model rather than worked around at the call site.
 
+---
+
+### 2026-07-31 (Idempotent intake — two levels, not one)
+
+**Decision:** Added `accident_cases.idempotency_key` (UUID, nullable, `UQ(reported_by, idempotency_key)`; additive migration, doc 04 §2.3 updated) alongside the existing `evidence_items.idempotency_key`. The wizard mints a case key with the draft and one key per photo, persists all of them in localStorage, and sends them on every attempt. The join page sends photo keys only.
+
+**Reason:** The audit item read "the frontend never sends `idempotency_key`", and sending it would have been hollow. `evidence_items.idempotency_key` dedups *within* a case — `EvidenceService::storeOne` looks up `(case_id, idempotency_key)`. On `POST /cases` there is no case yet, so a retry creates a new one and the evidence keys land on it harmlessly, deduplicating nothing. The duplicate a citizen on a bad connection actually causes is a duplicate *accident*: two cases, two counterparty SMS invitations, two claims downstream. That needs a key on the case, checked before anything is written so a replay is a pure read.
+
+The key is scoped to the reporter rather than globally unique because it is client-generated: one client's collision must never be able to swallow another user's report.
+
+**Impact:** The case key lives in the draft, so it survives a reload — which is the entire point; a key minted per submit would look like idempotency while providing none. `startOver()` calls `loadDraft()` rather than resetting to `EMPTY_DRAFT`, so a genuinely new report gets a genuinely new key. Photo keys are minted per slot and reused on a retake, and `collectPhotoKeys` is built from the same filtered slot list as `collectPhotos` so the two arrays stay index-aligned; `buildCaseFormData` sends no photo keys at all rather than a partial set, since a key paired with the wrong file is worse than no key.
+
+Not covered: the surveyor dispatch-complete path already had evidence keys from Sprint 4 but still has no UI to send them, and `POST /claims/{claim}/estimates` and the settlement endpoints have no idempotency at all. A settlement replay is currently prevented by the one-settlement-per-claim rule rather than by a key, which is enough today but is a different mechanism.
+
 ## Template
 
 ### YYYY-MM-DD

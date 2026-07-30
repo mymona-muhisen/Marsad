@@ -17,6 +17,8 @@ export type JoinInput = {
   token: string
   statement: string
   photos: File[]
+  /** One per photo, same order — a retry must not duplicate the evidence. */
+  photoKeys?: string[]
 }
 
 export function buildJoinFormData(input: JoinInput): FormData {
@@ -26,6 +28,14 @@ export function buildJoinFormData(input: JoinInput): FormData {
 
   for (const photo of input.photos) {
     form.append('photos[]', photo, photo.name)
+  }
+
+  // The case already exists on this path, so the evidence-level key is the
+  // whole contract: `storeOne` returns the existing row for a repeated key.
+  if (input.photoKeys && input.photoKeys.length === input.photos.length) {
+    for (const key of input.photoKeys) {
+      form.append('idempotency_keys[]', key)
+    }
   }
 
   return form

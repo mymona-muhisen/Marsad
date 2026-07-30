@@ -21,6 +21,10 @@ class JoinCaseRequest extends FormRequest
             'voice_statement' => ['nullable', 'file', 'mimes:mp3,wav,m4a,ogg', 'max:10240', 'required_without:statement'],
             'photos' => ['required', 'array', 'min:4'],
             'photos.*' => ['file', 'mimes:jpg,jpeg,png', 'max:5120'],
+            // Parallel to `photos` — the case already exists here, so the
+            // evidence-level key is enough to make a retry harmless.
+            'idempotency_keys' => ['nullable', 'array'],
+            'idempotency_keys.*' => ['nullable', 'uuid'],
         ];
     }
 }
