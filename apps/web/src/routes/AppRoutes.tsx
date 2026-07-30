@@ -24,6 +24,7 @@ import { ReportSuccessPage } from '@/features/report/ReportSuccessPage'
 import { ReportWizard } from '@/features/report/ReportWizard'
 import { VehiclesPage } from '@/features/vehicles/VehiclesPage'
 import { VerifyReportPage } from '@/features/verify/VerifyReportPage'
+import { JoinCasePage } from '@/features/join/JoinCasePage'
 import { RequireAuth, RequireRole } from './guards'
 import { NotFoundPage } from './NotFoundPage'
 
@@ -54,6 +55,11 @@ export function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/verify" element={<VerifyReportPage />} />
       <Route path="/verify/:qrToken" element={<VerifyReportPage />} />
+
+      {/* The counterparty deep link from SMS. Public by necessity — the
+          recipient has no account yet; the page gates on sign-in itself once
+          the facts are shown. */}
+      <Route path="/join/:token" element={<JoinCasePage />} />
 
       {/* Authenticated */}
       <Route element={<RequireAuth />}>

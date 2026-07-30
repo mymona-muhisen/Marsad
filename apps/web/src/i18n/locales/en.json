@@ -246,6 +246,50 @@
     }
   },
 
+  "join": {
+    "title": "Add your account of the accident",
+    "subtitle": "An accident you were involved in has been reported. Add your photos and your account so the case is decided from both sides.",
+    "caseNo": "Case number",
+    "occurredAt": "Occurred",
+    "region": "Governorate",
+    "invalidToken": "This link is invalid or has expired. Contact the authority to have a new one issued.",
+    "whyNoStatement": "We don't show you the other party's account before you write yours — so your statement stays your own.",
+
+    "signIn": {
+      "title": "Sign in to continue",
+      "body": "Use the same phone number that received the message. You cannot join with a different number.",
+      "action": "Sign in"
+    },
+
+    "steps": {
+      "photos": "Photos",
+      "statement": "Your account"
+    },
+
+    "statement": {
+      "title": "Tell us what happened from your side",
+      "label": "Your account",
+      "placeholder": "Describe it in your own words: which way you were going, roughly how fast, and what the other party did.",
+      "required": "Write your account of what happened.",
+      "tooLong": "Your account is longer than 2000 characters."
+    },
+
+    "photosRequired": "All four guided photos are required.",
+    "next": "Next",
+    "previous": "Back",
+    "submit": "Send my account",
+    "submitting": "Sending…",
+    "phoneMismatch": "Your phone number doesn't match the party named in this accident. Sign in with the number that received the message.",
+    "submitFailed": "Could not send your account. Please try again.",
+
+    "success": {
+      "title": "Your account has been added",
+      "body": "The case is now among your cases, and you can follow it at every step.",
+      "viewCase": "View the case",
+      "myCases": "My cases"
+    }
+  },
+
   "dashboards": {
     "filters": {
       "from": "From",

@@ -704,6 +704,36 @@ This document records architectural and implementation decisions made during dev
 
 **Impact:** Visual review is still outstanding: label collision, RTL mirroring of the time axis, and dark-mode rendering have been reasoned about but not seen. Anyone with a browser to hand should open the four screens before this is shown to an examiner.
 
+---
+
+### 2026-07-30 (Sprint 15)
+
+**Decision:** The counterparty join deep link is now built from a new `config('app.frontend_url')` (`FRONTEND_URL`, default `http://localhost:5173`) instead of `config('app.url')`.
+
+**Reason:** The SMS sent to the second driver pointed at `APP_URL` — the API's own host, where `/join/{token}` is not a route. This API is API-only and is not co-hosted with the SPA, so the recipient of the platform's central anti-fraud invitation would have opened a 404. Nothing caught it because no test asserted the *host* of the link, only that a token existed; `CounterpartyDeepLinkTest` now pulls the token out of the message body and feeds it to the teaser endpoint, covering the recipient's journey end to end.
+
+**Impact:** `FRONTEND_URL` must be set per environment or human-facing links break silently in exactly the same way. Any future outbound link to a person belongs on this config, never on `app.url`.
+
+---
+
+### 2026-07-30 (Sprint 15)
+
+**Decision:** The join page hands anonymous arrivals to the existing `/login` screen with a return path in router state, rather than embedding a second phone+OTP form as doc 06 Sprint 9 task 3 ("inline OTP") reads.
+
+**Reason:** A second OTP implementation is a second place for rate-limit handling, resend timing, and error copy to drift out of step with the first. The recipient's experience is one extra navigation and back; the alternative is duplicated auth logic on the platform's most security-sensitive entry point. `RequireAuth` already established the `state.from` convention, so the return path is the mechanism already in use.
+
+**Impact:** The join flow inherits any future change to sign-in for free. It also means the deep link cannot complete without leaving the page once — if a bounce ever shows up in real use, the fix is to make the login screen embeddable, not to fork it.
+
+---
+
+### 2026-07-30 (Sprint 15)
+
+**Decision:** The join page reuses `PhotosStep` from the reporting wizard whole, and writes its own statement field instead of reusing `StatementStep`. Draft state is held in memory only — no localStorage or IndexedDB persistence, unlike the wizard.
+
+**Reason:** `PhotosStep` is genuinely decoupled (photos in, handlers out) and carries the four guided slots, the ghost frames, and the client-side compression — reimplementing any of that would guarantee the two capture flows diverge. `StatementStep` is bound to `ReportDraft`, and the counterparty's prompt is a different question anyway ("your side of what happened"), so a shared component would have needed a props escape hatch for no gain. Persistence was left out because the join flow is two steps against a 24-hour token, not the wizard's six against an open-ended draft; adding a second set of storage keys is real complexity for a much smaller window of loss.
+
+**Impact:** A counterparty who closes the tab mid-flow loses their photos and retypes their statement. If that turns out to matter, `photo-store.ts` takes a key parameter away from being reusable here — the wizard's persistence was written keyless on the assumption of a single draft.
+
 ## Template
 
 ### YYYY-MM-DD

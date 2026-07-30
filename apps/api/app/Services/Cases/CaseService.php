@@ -112,7 +112,10 @@ class CaseService
 
             $this->smsGateway->send(
                 $phone,
-                "تم تسجيلك كطرف في حادث مروري رقم {$case->case_no}. لإكمال بيانك: ".config('app.url')."/join/{$token}",
+                // Built from the SPA's URL, not the API's: this link is opened
+                // by a person in a browser, and /join/{token} is a frontend
+                // route that does not exist on the API host.
+                "تم تسجيلك كطرف في حادث مروري رقم {$case->case_no}. لإكمال بيانك: ".rtrim((string) config('app.frontend_url'), '/')."/join/{$token}",
             );
         }
 

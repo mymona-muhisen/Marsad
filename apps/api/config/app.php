@@ -56,6 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    |
+    | Where the React SPA is served. This API is API-only and is NOT co-hosted
+    | with the SPA, so any link sent to a human — the counterparty join deep
+    | link in particular — must be built from this and never from APP_URL.
+    | APP_URL points at the API, where /join/{token} is not a route at all.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
