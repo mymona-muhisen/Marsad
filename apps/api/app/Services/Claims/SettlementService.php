@@ -2,6 +2,7 @@
 
 namespace App\Services\Claims;
 
+use App\Contracts\PaymentRecorder;
 use App\Enums\ClaimStatus;
 use App\Enums\SettlementMode;
 use App\Models\Claim;
@@ -17,7 +18,10 @@ use Illuminate\Validation\ValidationException;
  */
 class SettlementService
 {
-    public function __construct(private readonly ClaimTimelineService $timeline) {}
+    public function __construct(
+        private readonly ClaimTimelineService $timeline,
+        private readonly PaymentRecorder $payments,
+    ) {}
 
     public function record(Claim $claim, User $agent, SettlementMode $mode, float $amount, ?int $workshopOrgId): Settlement
     {
@@ -41,8 +45,23 @@ class SettlementService
             'settled_at' => now(),
         ]);
 
+        // The payout goes through the adapter, never a vendor call inline
+        // (CLAUDE.md rule #4). In record-only mode nothing is transferred —
+        // the receipt states that the payout was authorised.
+        $receipt = $this->payments->record($settlement);
+
         $claim->forceFill(['status' => ClaimStatus::Settled])->save();
-        $this->timeline->log($claim, $agent, 'settled');
+
+        // The receipt lands on the append-only claim timeline rather than a new
+        // column: doc 04 §2.5 already makes that the record of every mutation,
+        // and it is what the claimant reads.
+        $this->timeline->log(
+            $claim,
+            $agent,
+            'settled',
+            null,
+            "مرجع الدفع: {$receipt->reference}",
+        );
 
         $claim->forceFill(['status' => ClaimStatus::Closed])->save();
         $this->timeline->log($claim, $agent, 'closed');
