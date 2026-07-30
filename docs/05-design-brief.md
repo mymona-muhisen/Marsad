@@ -1,14 +1,14 @@
-# Masar (مسار) — Visual Design Brief
-*Attach this file + `03-proposal-masar.md` to the design session.*
+# Marsad (مرصد) — Visual Design Brief
+*Attach this file + `03-proposal-marsad.md` to the design session.*
 
 ## Brand
-- **Name:** مسار (Masar — "path/route"). Domain feel: roads, motion, resolution, trust.
+- **Name:** مرصد (Marsad — "path/route"). Domain feel: roads, motion, resolution, trust.
 - **Personality:** governmental-grade trust + modern fintech clarity. NOT playful. Think: Absher/Najm credibility with cleaner, calmer UI.
 - **Logo directions (pick one, iterate):**
-  1. Arabic wordmark «مسار» where the connecting stroke forms a road/path with a subtle route-pin or checkpoint.
+  1. Arabic wordmark مرصد where the connecting stroke forms a road/path with a subtle route-pin or checkpoint.
   2. Abstract mark: two converging lanes forming the letter م, resolving into one line (two parties → one settlement).
   3. Shield + road monogram (trust + traffic). Avoid clichés: no car crashes, no cracked glass.
-- Must work: single color, small favicon 16px, on dark & light, next to Arabic AND Latin "Masar".
+- Must work: single color, small favicon 16px, on dark & light, next to Arabic AND Latin "Marsad".
 
 ## Colors (suggested starting palette)
 - Primary: deep trust blue `#1F4E79` / `#2C5F8A`

@@ -7,7 +7,7 @@ export const DEFAULT_LOCALE: Locale = 'ar'
 
 const RTL_LOCALES: readonly Locale[] = ['ar']
 
-const LOCALE_KEY = 'masar.locale'
+const LOCALE_KEY = 'marsad.locale'
 
 export function isLocale(value: string): value is Locale {
   return (SUPPORTED_LOCALES as readonly string[]).includes(value)

@@ -87,7 +87,7 @@ describe('LoginPage', () => {
     ).toBeInTheDocument()
 
     await waitFor(() =>
-      expect(window.localStorage.getItem('masar.auth.token')).toBe('fresh-token'),
+      expect(window.localStorage.getItem('marsad.auth.token')).toBe('fresh-token'),
     )
   })
 

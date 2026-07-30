@@ -1,4 +1,4 @@
-# CLAUDE.md — Masar (مسار)
+# CLAUDE.md — Marsad (مرصد)
 Smart Traffic Accident & Insurance Management Platform for Syria. Graduation project, production-quality bar.
 
 ## Context documents (read before coding)

@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class CloseObjectionWindows extends Command
 {
-    protected $signature = 'masar:close-objection-windows';
+    protected $signature = 'marsad:close-objection-windows';
 
     protected $description = 'Finalize fault decisions whose 72h objection window expired with no objection.';
 

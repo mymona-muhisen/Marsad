@@ -1,4 +1,4 @@
-const DB_NAME = 'masar-report'
+const DB_NAME = 'marsad-report'
 const DB_VERSION = 1
 const STORE = 'photos'
 const KEY = 'draft'

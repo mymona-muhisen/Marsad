@@ -48,5 +48,5 @@ export function makeUser(overrides: Partial<User> = {}): User {
 
 /** Puts a token in storage so the auth provider boots into a signed-in state. */
 export function signInWithToken(token = 'test-token'): void {
-  window.localStorage.setItem('masar.auth.token', token)
+  window.localStorage.setItem('marsad.auth.token', token)
 }

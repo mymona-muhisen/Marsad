@@ -1,4 +1,4 @@
-# مسار (Masar)
+# مرصد (Marsad)
 
 Smart Traffic Accident & Insurance Management Platform for Syria.
 
@@ -28,8 +28,8 @@ php artisan key:generate
 Create the database (name/host/credentials must match `.env`):
 
 ```sql
-CREATE DATABASE masar CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE masar_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE marsad CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE marsad_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ```bash

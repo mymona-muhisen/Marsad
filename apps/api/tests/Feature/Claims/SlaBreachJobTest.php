@@ -17,7 +17,7 @@ class SlaBreachJobTest extends TestCase
         $breached = Claim::factory()->create(['sla_due_at' => now()->subDay(), 'status' => ClaimStatus::Opened->value]);
         $onTime = Claim::factory()->create(['sla_due_at' => now()->addDay(), 'status' => ClaimStatus::Opened->value]);
 
-        $this->artisan('masar:flag-sla-breaches')->assertSuccessful();
+        $this->artisan('marsad:flag-sla-breaches')->assertSuccessful();
 
         $this->assertDatabaseHas('claim_events', ['claim_id' => $breached->id, 'action' => 'sla_breached']);
         $this->assertDatabaseMissing('claim_events', ['claim_id' => $onTime->id, 'action' => 'sla_breached']);
@@ -28,7 +28,7 @@ class SlaBreachJobTest extends TestCase
         $settled = Claim::factory()->create(['sla_due_at' => now()->subDay(), 'status' => ClaimStatus::Settled->value]);
         $closed = Claim::factory()->create(['sla_due_at' => now()->subDay(), 'status' => ClaimStatus::Closed->value]);
 
-        $this->artisan('masar:flag-sla-breaches')->assertSuccessful();
+        $this->artisan('marsad:flag-sla-breaches')->assertSuccessful();
 
         $this->assertDatabaseMissing('claim_events', ['claim_id' => $settled->id, 'action' => 'sla_breached']);
         $this->assertDatabaseMissing('claim_events', ['claim_id' => $closed->id, 'action' => 'sla_breached']);
@@ -38,8 +38,8 @@ class SlaBreachJobTest extends TestCase
     {
         $claim = Claim::factory()->create(['sla_due_at' => now()->subDay(), 'status' => ClaimStatus::Opened->value]);
 
-        $this->artisan('masar:flag-sla-breaches')->assertSuccessful();
-        $this->artisan('masar:flag-sla-breaches')->assertSuccessful();
+        $this->artisan('marsad:flag-sla-breaches')->assertSuccessful();
+        $this->artisan('marsad:flag-sla-breaches')->assertSuccessful();
 
         $this->assertSame(1, ClaimEvent::where('claim_id', $claim->id)->where('action', 'sla_breached')->count());
     }

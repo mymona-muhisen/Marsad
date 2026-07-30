@@ -18,7 +18,7 @@ use App\Models\AccidentCase;
  *  - under_review -> evidence_complete: no counterparty exists at all
  *    (declared hit-and-run) - nothing to wait on, skip the wait state.
  *  - awaiting_counterparty -> evidence_complete: counterparty joined, or
- *    the 24h one-sided timer fired (masar:flag-one-sided-cases).
+ *    the 24h one-sided timer fired (marsad:flag-one-sided-cases).
  *  - evidence_complete -> adjudication -> decision_issued -> objection_window
  *    -> final -> closed: the fault/claims pipeline built in later sprints.
  *  - escalated: reachable from most active states for disputes/anomalies

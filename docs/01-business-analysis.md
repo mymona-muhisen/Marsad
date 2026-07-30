@@ -1,7 +1,7 @@
 # Smart Traffic Accident & Insurance Management Platform for Syria
 ## Business Analysis & Concept Design — Document 01
 
-**Project codename:** *Tasweya* (تسوية — "settlement") — working name, changeable.
+**Project codename:** *Marsad* (مرصد — "settlement") — working name, changeable.
 **Version:** 1.0 · July 2026
 
 ---

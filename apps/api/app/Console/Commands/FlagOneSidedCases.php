@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class FlagOneSidedCases extends Command
 {
-    protected $signature = 'masar:flag-one-sided-cases';
+    protected $signature = 'marsad:flag-one-sided-cases';
 
     protected $description = 'Flag cases whose counterparty never joined within 24h and advance them past awaiting_counterparty.';
 

@@ -1,4 +1,4 @@
-# Tasweya — System Analysis & Design Diagrams
+# Marsad — System Analysis & Design Diagrams
 ## Document 02 — ERD, Use Cases, Activity Diagrams
 
 **Version:** 1.0 · July 2026
