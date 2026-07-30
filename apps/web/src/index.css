@@ -15,6 +15,23 @@
   --accent: #34c7ad;
   --accent-soft: #7fd8c6;
   --gold: #d8b45a;
+
+  /* Sequential ramp for the dashboards, stepped from the brand blue.
+     Every chart here encodes magnitude of one series, so one hue
+     light→dark is the whole palette — no categorical hues are needed.
+     Validated as an ordinal ramp against --background: monotone lightness,
+     adjacent ΔL ≥ 0.06, and a light end clearing 2:1 on the surface
+     (#8fb4d4 = 2.06:1). Re-run the check if either end moves. */
+  --seq-1: #8fb4d4;
+  --seq-2: #6b9bc4;
+  --seq-3: #4d80ad;
+  --seq-4: #31628f;
+  --seq-5: #1f4e79;
+
+  /* Chart chrome, kept recessive so the marks carry the reading. */
+  --chart-grid: #e2e8f0;
+  --chart-axis: #cbd5e1;
+  --chart-muted: #64748b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,6 +44,19 @@
     --warning: #fbbf24;
     --danger: #f87171;
     --border: #1e293b;
+
+    /* Selected for the dark surface, not an inversion of the light ramp:
+       re-stepped and re-validated against --background #0f172a
+       (light end #24547e = 2.25:1, adjacent ΔL ≥ 0.06, one hue). */
+    --seq-1: #24547e;
+    --seq-2: #33689a;
+    --seq-3: #4681b8;
+    --seq-4: #619dd0;
+    --seq-5: #86bbe2;
+
+    --chart-grid: #1e293b;
+    --chart-axis: #334155;
+    --chart-muted: #94a3b8;
   }
 }
 
@@ -43,6 +73,14 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-gold: var(--gold);
+  --color-seq-1: var(--seq-1);
+  --color-seq-2: var(--seq-2);
+  --color-seq-3: var(--seq-3);
+  --color-seq-4: var(--seq-4);
+  --color-seq-5: var(--seq-5);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
+  --color-chart-muted: var(--chart-muted);
 }
 
 body {
