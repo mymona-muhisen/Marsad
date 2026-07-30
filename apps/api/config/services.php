@@ -48,4 +48,12 @@ return [
         'driver' => env('POLICY_VERIFIER_DRIVER', 'manual'),
     ],
 
+    'payment_recorder' => [
+        // 'record_only' (default) registers the payout without moving money —
+        // settlements are cash-dominant and happen outside the platform
+        // (doc 01 §A.4). A real rail is added here behind the same interface.
+        'driver' => env('PAYMENT_RECORDER_DRIVER', 'record_only'),
+        'log_channel' => env('PAYMENT_RECORDER_LOG_CHANNEL', 'stack'),
+    ],
+
 ];

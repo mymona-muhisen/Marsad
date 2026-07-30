@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\PaymentRecorder;
 use App\Contracts\PolicyVerifier;
 use App\Contracts\SmsGateway;
 use App\Events\CaseFinalized;
@@ -9,6 +10,7 @@ use App\Listeners\OpenClaimsForFinalizedCase;
 use App\Models\Claim;
 use App\Models\FaultDecision;
 use App\Observers\AuditObserver;
+use App\Services\Payments\RecordOnlyPaymentRecorder;
 use App\Services\Policy\ManualPolicyVerifier;
 use App\Services\Sms\LogSmsGateway;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -35,6 +37,12 @@ class AppServiceProvider extends ServiceProvider
             // Manual mode only (FR-R3); an "api" driver is added here when an
             // insurer exposes a real verification API.
             default => ManualPolicyVerifier::class,
+        });
+
+        $this->app->bind(PaymentRecorder::class, match (config('services.payment_recorder.driver', 'record_only')) {
+            // Record-only (CLAUDE.md rule #4): the payout is registered, the
+            // money moves outside the platform. A real rail binds here.
+            default => RecordOnlyPaymentRecorder::class,
         });
     }
 

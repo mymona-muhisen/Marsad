@@ -746,6 +746,20 @@ This document records architectural and implementation decisions made during dev
 
 A local `.env` is not touched by this (it is gitignored), so an existing development database keeps its old name and keeps working; only a fresh clone follows `.env.example`. `marsad_testing` had to be created for the suite to run. The repository folder itself (`Masar-code`) and the GitHub remote were left alone — renaming either is the owner's call and breaks clones.
 
+---
+
+### 2026-07-30 (PaymentRecorder — closing a rule #4 gap)
+
+**Decision:** Added the third adapter CLAUDE.md rule #4 names: `App\Contracts\PaymentRecorder`, with `RecordOnlyPaymentRecorder` as the manual-mode default, bound through `config('services.payment_recorder.driver')` exactly like `SmsGateway` and `PolicyVerifier`. `SettlementService` now calls it instead of writing the settlement and stopping there. It returns a `PaymentReceipt` value object (reference, driver, `recordedAt`, `movedFunds`).
+
+**Reason:** Rule #4 names three adapters and only two existed — settlements went straight to the database with no seam for a payment rail. Record-only is the honest default rather than a placeholder: doc 01 §A.4 lists stable payments infrastructure among the preconditions Syria lacks, so a cash settlement is handed over in person and a repair order is worked off at a workshop. The platform's job is to state authoritatively that the insurer owes it, not to transfer it — and `movedFunds: false` says so in the type rather than in a comment.
+
+**Impact:** The receipt reference goes onto the append-only claim timeline (`claim_events.note`) rather than a new `settlements` column. Doc 04 §2.5 already makes that table the record of every claim mutation, so no schema change was needed and the claimant sees the reference on the timeline they already read. When a real rail lands and its transaction id needs querying rather than reading, that is the point to add a column — not before.
+
+The reference is random (`REC-YYMMDD-XXXXXX`), not derived from the settlement id: it is shown to a user, and rule #10 keeps sequential ids out of anything a user reads. A test asserts two receipts for the same settlement differ, which is what actually proves non-derivation — an earlier version asserted the id was not a substring, which is meaningless for a one-digit id inside a date.
+
+PHPStan caught that `Settlement::$mode` had no `@property` annotation, so `->mode->value` was unverifiable even though the cast was correct; the annotation was added to the model rather than worked around at the call site.
+
 ## Template
 
 ### YYYY-MM-DD

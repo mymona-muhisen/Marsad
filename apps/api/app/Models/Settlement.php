@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * The `casts()` return type is `array<string, string>`, so static analysis
+ * cannot infer the enum behind `mode` — declare it, as the other models do.
+ *
+ * @property SettlementMode $mode
+ */
 class Settlement extends Model
 {
     /** @use HasFactory<SettlementFactory> */
