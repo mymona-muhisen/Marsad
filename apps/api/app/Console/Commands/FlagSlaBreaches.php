@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class FlagSlaBreaches extends Command
 {
-    protected $signature = 'masar:flag-sla-breaches';
+    protected $signature = 'marsad:flag-sla-breaches';
 
     protected $description = 'Log an sla_breached claim_event for claims past their SLA due date.';
 

@@ -1,4 +1,4 @@
-# Masar - Architecture Decisions
+# Marsad - Architecture Decisions
 
 This document records architectural and implementation decisions made during development.
 
@@ -733,6 +733,18 @@ This document records architectural and implementation decisions made during dev
 **Reason:** `PhotosStep` is genuinely decoupled (photos in, handlers out) and carries the four guided slots, the ghost frames, and the client-side compression — reimplementing any of that would guarantee the two capture flows diverge. `StatementStep` is bound to `ReportDraft`, and the counterparty's prompt is a different question anyway ("your side of what happened"), so a shared component would have needed a props escape hatch for no gain. Persistence was left out because the join flow is two steps against a 24-hour token, not the wizard's six against an open-ended draft; adding a second set of storage keys is real complexity for a much smaller window of loss.
 
 **Impact:** A counterparty who closes the tab mid-flow loses their photos and retypes their statement. If that turns out to matter, `photo-store.ts` takes a key parameter away from being reusable here — the wizard's persistence was written keyless on the assumption of a single draft.
+
+---
+
+### 2026-07-30 (Rename: Masar → Marsad)
+
+**Decision:** The platform is now **مرصد / Marsad**. Renamed across the code: the four scheduled commands (`masar:*` → `marsad:*`, lowercase per Laravel convention), the test database (`masar_testing` → `marsad_testing`, in `phpunit.xml` and CI), `APP_NAME`, `DB_DATABASE` in `.env.example`, the signed PDF report's footer, `common.appName`/`appLatin` in the English lang file, all four browser storage keys, and `docs/03-proposal-masar.md` → `03-proposal-marsad.md`. Earlier entries in *this* log keep their original wording — a dated decision record that gets edited to match the present is no longer a record. Where an old entry names `masar_testing`, this entry supersedes it.
+
+**Reason:** A blind find-and-replace would have corrupted the Arabic copy. «مسار» is also the ordinary word for *lane / track / path*, and it appears throughout the product as exactly that: `مسار سريع` (fast track), `مسار القضية` (case progress), `تغيير مسار خاطئ` (improper lane change — a liability rule), `كنت أسير في مساري` (I was in my lane — a witness statement in a test fixture). Each occurrence was read before being touched; only the brand ones changed. The Arabic lang file already read `مرصد`, so the damage would have been entirely one-directional and silent.
+
+**Impact:** The old auth token key is read once and carried forward, so nobody is signed out by the rename — including a demo account mid-presentation. The old draft key is purged instead of migrated: a draft is only coherent with its photos, which live in a separately-renamed IndexedDB database, so carrying the text across would resume the wizard with four empty slots under a "picked up where you left off" banner. Both legacy constants are marked and can be deleted once no browser can plausibly hold the old keys.
+
+A local `.env` is not touched by this (it is gitignored), so an existing development database keeps its old name and keeps working; only a fresh clone follows `.env.example`. `marsad_testing` had to be created for the suite to run. The repository folder itself (`Masar-code`) and the GitHub remote were left alone — renaming either is the owner's call and breaks clones.
 
 ## Template
 

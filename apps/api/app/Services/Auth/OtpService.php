@@ -28,7 +28,7 @@ class OtpService
             'consumed_at' => null,
         ]);
 
-        $this->smsGateway->send($phone, "رمز التحقق الخاص بك في مسار هو: {$code}");
+        $this->smsGateway->send($phone, "رمز التحقق الخاص بك في مرصد هو: {$code}");
     }
 
     /**

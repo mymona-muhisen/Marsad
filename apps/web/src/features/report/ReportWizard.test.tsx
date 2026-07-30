@@ -217,7 +217,7 @@ describe('ReportWizard', () => {
 
     // A submitted report must not leave a draft behind to resume.
     await waitFor(() =>
-      expect(window.localStorage.getItem('masar.report.draft')).toBeNull(),
+      expect(window.localStorage.getItem('marsad.report.draft')).toBeNull(),
     )
   })
 
@@ -255,6 +255,6 @@ describe('ReportWizard', () => {
     await user.click(await screen.findByRole('button', { name: 'إرسال التبليغ' }))
 
     expect(await screen.findByText('خطأ في الخادم.')).toBeInTheDocument()
-    expect(window.localStorage.getItem('masar.report.draft')).not.toBeNull()
+    expect(window.localStorage.getItem('marsad.report.draft')).not.toBeNull()
   })
 })

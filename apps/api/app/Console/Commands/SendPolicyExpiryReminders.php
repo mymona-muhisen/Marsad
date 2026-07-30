@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class SendPolicyExpiryReminders extends Command
 {
-    protected $signature = 'masar:policy-expiry-reminders';
+    protected $signature = 'marsad:policy-expiry-reminders';
 
     protected $description = 'Send SMS/notification reminders for policies expiring in 30/7/1 days.';
 

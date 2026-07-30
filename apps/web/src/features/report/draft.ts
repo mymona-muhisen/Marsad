@@ -1,4 +1,14 @@
-const DRAFT_KEY = 'masar.report.draft'
+const DRAFT_KEY = 'marsad.report.draft'
+
+/**
+ * Pre-rename key, purged rather than migrated.
+ *
+ * A draft is only coherent together with its photos, which live in a separate
+ * IndexedDB database that also got renamed. Carrying the text across while the
+ * photos stayed behind would resume the wizard with four empty slots and a
+ * "picked up where you left off" banner — more confusing than starting clean.
+ */
+const LEGACY_DRAFT_KEY = 'masar.report.draft'
 
 /**
  * The wizard's text fields. Photos live in IndexedDB instead — see
@@ -54,6 +64,8 @@ function isDraftShaped(value: unknown): value is Partial<ReportDraft> {
  */
 export function loadDraft(): ReportDraft {
   try {
+    window.localStorage.removeItem(LEGACY_DRAFT_KEY)
+
     const raw = window.localStorage.getItem(DRAFT_KEY)
     if (!raw) return { ...EMPTY_DRAFT }
 

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import { EMPTY_DRAFT, clearDraft, hasDraft, loadDraft, saveDraft } from './draft'
 
-const KEY = 'masar.report.draft'
+const KEY = 'marsad.report.draft'
 
 afterEach(() => window.localStorage.clear())
 

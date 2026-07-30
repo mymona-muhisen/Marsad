@@ -106,6 +106,6 @@ describe('route guards', () => {
     expect(
       await screen.findByRole('heading', { name: 'تسجيل الدخول' }),
     ).toBeInTheDocument()
-    expect(window.localStorage.getItem('masar.auth.token')).toBeNull()
+    expect(window.localStorage.getItem('marsad.auth.token')).toBeNull()
   })
 })

@@ -28,7 +28,7 @@ class ObjectionWindowClosingTest extends TestCase
         FaultAllocation::factory()->create(['decision_id' => $decision->id, 'party_id' => $reporter->id, 'percentage' => 0]);
         FaultAllocation::factory()->create(['decision_id' => $decision->id, 'party_id' => $counterparty->id, 'percentage' => 100]);
 
-        $this->artisan('masar:close-objection-windows')->assertSuccessful();
+        $this->artisan('marsad:close-objection-windows')->assertSuccessful();
 
         $this->assertDatabaseHas('fault_decisions', ['id' => $decision->id, 'status' => FaultDecisionStatus::Final->value]);
         $this->assertDatabaseHas('accident_cases', ['id' => $case->id, 'status' => CaseStatus::Final->value]);
@@ -39,7 +39,7 @@ class ObjectionWindowClosingTest extends TestCase
         $case = AccidentCase::factory()->create(['status' => CaseStatus::ObjectionWindow->value]);
         $decision = FaultDecision::factory()->create(['case_id' => $case->id, 'decided_at' => now()->subHours(10)]);
 
-        $this->artisan('masar:close-objection-windows')->assertSuccessful();
+        $this->artisan('marsad:close-objection-windows')->assertSuccessful();
 
         $this->assertDatabaseHas('fault_decisions', ['id' => $decision->id, 'status' => FaultDecisionStatus::Confirmed->value]);
         $this->assertDatabaseHas('accident_cases', ['id' => $case->id, 'status' => CaseStatus::ObjectionWindow->value]);

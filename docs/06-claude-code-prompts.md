@@ -1,4 +1,4 @@
-# Masar — Claude Code Sprint Prompts
+# Marsad — Claude Code Sprint Prompts
 Paste ONE sprint per session, in order. Always start the session with Prompt 0 line included.
 Attach/keep in repo root: `CLAUDE.md` + `01-التحليل والتوثيق/` folder (docs 01, 02, 04).
 
@@ -56,7 +56,7 @@ Tasks:
    GET /api/v1/insurer/policies?status=pending and POST .../{id}/verify|reject —
    scoped to their organization_id via policy classes. Manual mode of the
    PolicyVerifier adapter; leave the interface ready for a future API mode.
-5. Scheduled command masar:policy-expiry-reminders (30/7/1 days) dispatching
+5. Scheduled command marsad:policy-expiry-reminders (30/7/1 days) dispatching
    notifications through SmsGateway; notifications table (Phase 6 pulled early is OK —
    note it in DECISIONS.md).
 6. Tests: authz matrix (citizen can't verify, agent can't see other org's queue),

@@ -1,4 +1,4 @@
-# Masar — Database Design (MySQL 8)
+# Marsad — Database Design (MySQL 8)
 ## Document 04 — Physical Model, Normalization, Constraints, Indexes, Migration Plan
 
 **Version:** 1.0 · July 2026 · Companion ERD: `04a-erd-physical.puml`
@@ -136,7 +136,7 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | statement_text | TEXT | nullable |
 | joined_at | TIMESTAMP | nullable |
 | join_token | VARCHAR(64) | nullable, **UQ** — implementation addition, Sprint 3 (see DECISIONS.md): the counterparty's signed, expiring deep-link credential |
-| join_token_expires_at | TIMESTAMP | nullable — 24h from case creation; nulled on join or on `masar:flag-one-sided-cases` expiry |
+| join_token_expires_at | TIMESTAMP | nullable — 24h from case creation; nulled on join or on `marsad:flag-one-sided-cases` expiry |
 | UQ | | `UQ(case_id, role)` for the pilot's 2-party scope — dropped when multi-vehicle lands |
 
 *Decision — the nullable triple is the "verification-flexible" pillar in schema form:* hit-and-run = all three null + `unregistered_plate`; uninsured = policy null. Every real-world degraded case is representable without dummy rows.
