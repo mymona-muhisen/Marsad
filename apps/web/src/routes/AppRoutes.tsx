@@ -8,6 +8,7 @@ import { CaseDetailPage } from '@/features/cases/CaseDetailPage'
 import { CasesPage } from '@/features/cases/CasesPage'
 import { ClaimDetailPage } from '@/features/claims/ClaimDetailPage'
 import { ClaimsPage } from '@/features/claims/ClaimsPage'
+import { AdminPage } from '@/features/admin/AdminPage'
 import { AssignedClaimsPage } from '@/features/assessor/AssignedClaimsPage'
 import { EstimateClaimPage } from '@/features/assessor/EstimateClaimPage'
 import { DispatchesPage } from '@/features/surveyor/DispatchesPage'
@@ -39,6 +40,7 @@ const SECTION_SCREENS: Record<string, ReactElement> = {
   adjudicationQueue: <QueuePage />,
   dispatches: <DispatchesPage />,
   estimates: <AssignedClaimsPage />,
+  administration: <AdminPage />,
   insurerClaims: <InsurerClaimsPage />,
   insurerPolicies: <InsurerPoliciesPage />,
   slaReport: <SlaReportPage />,
