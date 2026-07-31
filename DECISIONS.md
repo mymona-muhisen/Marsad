@@ -774,6 +774,30 @@ The key is scoped to the reporter rather than globally unique because it is clie
 
 Not covered: the surveyor dispatch-complete path already had evidence keys from Sprint 4 but still has no UI to send them, and `POST /claims/{claim}/estimates` and the settlement endpoints have no idempotency at all. A settlement replay is currently prevented by the one-settlement-per-claim rule rather than by a key, which is enough today but is a different mechanism.
 
+---
+
+### 2026-07-31 (Surveyor console)
+
+**Decision:** `DispatchResource` now nests the case's `case_no`, `occurred_at`, `region`, `location_description`, `location_verified`, coordinates and `injury_flag`. `AccidentCasePolicy::view` admits a surveyor **only for a case they hold a dispatch on**. `DemoSeeder` seeds one `dispatch_required` case assigned to the demo surveyor.
+
+**Reason:** The dispatch payload carried `case_id` and nothing else — a sequential id the client cannot even resolve, since cases are addressed by `case_no`. A surveyor had no way to learn where to drive. And opening the case answered 403, the same shape of blocker found in Sprints 12 and 13: an endpoint group existed for a role that could not read the record it operated on. `injury_flag` is surfaced deliberately — a surveyor should know before arriving whether anyone was hurt.
+
+The surveyor grant is scoped rather than blanket, unlike the adjudicators'. Being sent to one accident is no reason to be able to read every other one, and `Dispatch` already carries the exact link that expresses it.
+
+**Impact:** Three roles can now read a case they are not a party to, by three different rules: adjudicators broadly, surveyors per dispatch, insurers only via the claim. `AccidentCasePolicy::view` is the single place that stays true, and the frontend route guard for `/app/cases/:caseNo` has to agree with it — it now allows `citizen` and `surveyor`, and a surveyor opening a case outside their dispatches gets the "not found or not permitted" state rather than a blank screen.
+
+Every case in `DemoSeeder` is `fast_track`, so no dispatch was ever auto-assigned and the screen was empty on a fresh database. The seeded dispatch's zone matches the surveyor's, so the row also demonstrates zone routing (FR-C5) rather than a blind assignment.
+
+---
+
+### 2026-07-31 (Surveyor console — the idempotency field name)
+
+**Decision:** The completion upload posts `photo_keys[]`, not `idempotency_keys[]` as the citizen intake and counterparty join do. The client mirrors the server's naming per endpoint rather than unifying it.
+
+**Reason:** `CompleteDispatchRequest` has read `photo_keys` since Sprint 4, and it is **required** with `size:count(photos)` — stricter than the citizen paths, where the keys are optional. Renaming the field to match would have been a breaking API change made for tidiness, on the one endpoint whose contract was already correct and already tested.
+
+**Impact:** Two names for one concept across the API, which a future consumer will trip over. The frontend client documents the discrepancy at the call site. If it is ever unified, `photo_keys` is the one to keep — it is the older contract and the only one that mandates the key.
+
 ## Template
 
 ### YYYY-MM-DD

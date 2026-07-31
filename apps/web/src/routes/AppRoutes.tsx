@@ -8,6 +8,7 @@ import { CaseDetailPage } from '@/features/cases/CaseDetailPage'
 import { CasesPage } from '@/features/cases/CasesPage'
 import { ClaimDetailPage } from '@/features/claims/ClaimDetailPage'
 import { ClaimsPage } from '@/features/claims/ClaimsPage'
+import { DispatchesPage } from '@/features/surveyor/DispatchesPage'
 import { QueuePage } from '@/features/adjudication/QueuePage'
 import { ReviewCasePage } from '@/features/adjudication/ReviewCasePage'
 import { InsurerClaimDetailPage } from '@/features/insurer/InsurerClaimDetailPage'
@@ -34,6 +35,7 @@ const SECTION_SCREENS: Record<string, ReactElement> = {
   myCases: <CasesPage />,
   myClaims: <ClaimsPage />,
   adjudicationQueue: <QueuePage />,
+  dispatches: <DispatchesPage />,
   insurerClaims: <InsurerClaimsPage />,
   insurerPolicies: <InsurerPoliciesPage />,
   slaReport: <SlaReportPage />,
@@ -83,9 +85,15 @@ export function AppRoutes() {
               </Route>
             ))}
 
-            {/* Detail screens sit under the same citizen guard as their lists. */}
-            <Route element={<RequireRole allowed={['citizen']} />}>
+            {/* Detail screens sit under the same citizen guard as their lists.
+                A surveyor reads the case file for the accident they were sent
+                to; the API scopes that to their own dispatch, and the page
+                reports a refusal as "not found or not permitted". */}
+            <Route element={<RequireRole allowed={['citizen', 'surveyor']} />}>
               <Route path="/app/cases/:caseNo" element={<CaseDetailPage />} />
+            </Route>
+
+            <Route element={<RequireRole allowed={['citizen']} />}>
               <Route path="/app/claims/:claimId" element={<ClaimDetailPage />} />
             </Route>
 
