@@ -5,17 +5,22 @@ namespace App\Http\Controllers\Api\V1\Insurer;
 use App\Enums\ClaimDecisionOutcome;
 use App\Enums\ClaimStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Claims\AssignAssessorRequest;
 use App\Http\Requests\Claims\DecideClaimRequest;
 use App\Http\Requests\Claims\IndexInsurerClaimsRequest;
 use App\Http\Resources\ClaimResource;
 use App\Models\Claim;
+use App\Services\Claims\AssessorAssignmentService;
 use App\Services\Claims\ClaimService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ClaimController extends Controller
 {
-    public function __construct(private readonly ClaimService $claims) {}
+    public function __construct(
+        private readonly ClaimService $claims,
+        private readonly AssessorAssignmentService $assignments,
+    ) {}
 
     public function index(IndexInsurerClaimsRequest $request): JsonResponse
     {
@@ -51,6 +56,23 @@ class ClaimController extends Controller
             ClaimDecisionOutcome::from($request->validated('outcome')),
             $request->validated('reason_code'),
             $request->validated('note'),
+        );
+
+        return (new ClaimResource($claim))->response();
+    }
+
+    /**
+     * Put an assessor office or workshop on the claim, or clear it.
+     *
+     * Until this existed nothing recorded the insurer's choice, so the estimate
+     * endpoint had nothing to authorise against.
+     */
+    public function assignAssessor(AssignAssessorRequest $request, Claim $claim): JsonResponse
+    {
+        $claim = $this->assignments->assign(
+            $claim,
+            $request->user(),
+            $request->validated('assessor_org_id'),
         );
 
         return (new ClaimResource($claim))->response();

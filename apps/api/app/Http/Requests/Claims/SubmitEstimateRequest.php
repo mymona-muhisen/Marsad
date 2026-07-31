@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Claims;
 
 use App\Enums\DamageEstimateType;
+use App\Models\Claim;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +11,12 @@ class SubmitEstimateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        /** @var Claim $claim */
+        $claim = $this->route('claim');
+
+        // Was a bare `true`: the role middleware let any assessor through, and
+        // nothing tied them to this claim. `claims.assessor_org_id` now does.
+        return $this->user()?->can('estimate', $claim) ?? false;
     }
 
     /**

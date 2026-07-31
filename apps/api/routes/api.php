@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\V1\Adjudication\AdjudicationController;
 use App\Http\Controllers\Api\V1\Adjudication\LiabilityRuleController;
 use App\Http\Controllers\Api\V1\Adjudication\ObjectionController;
+use App\Http\Controllers\Api\V1\Assessor\ClaimController as AssessorClaimController;
+use App\Http\Controllers\Api\V1\Assessor\PartsPriceController;
 use App\Http\Controllers\Api\V1\Auth\OtpController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
 use App\Http\Controllers\Api\V1\Authority\AnalyticsController as AuthorityAnalyticsController;
@@ -70,6 +72,8 @@ Route::prefix('v1')->group(function () {
                 Route::post('policies/{policy}/verify', [InsurerPolicyController::class, 'verify']);
                 Route::post('policies/{policy}/reject', [InsurerPolicyController::class, 'reject']);
                 Route::post('claims/{claim}/decide', [InsurerClaimController::class, 'decide']);
+                // Doc 01 §B.3 stage 6: the insurer chooses who prices the damage.
+                Route::post('claims/{claim}/assessor', [InsurerClaimController::class, 'assignAssessor']);
                 Route::post('claims/{claim}/settlement', [SettlementController::class, 'store']);
             });
         });
@@ -107,6 +111,14 @@ Route::prefix('v1')->group(function () {
 
         Route::get('claims', [ClaimController::class, 'index']);
         Route::get('claims/{claim}', [ClaimController::class, 'show']);
+        Route::prefix('assessor')->middleware('role:assessor|workshop')->group(function () {
+            Route::get('claims', [AssessorClaimController::class, 'index']);
+            Route::get('claims/{claim}', [AssessorClaimController::class, 'show']);
+            // The reference the deviation flag is measured against — an
+            // assessor was previously judged against a list they could not see.
+            Route::get('parts-prices', [PartsPriceController::class, 'index']);
+        });
+
         Route::post('claims/{claim}/estimates', [EstimateController::class, 'store'])->middleware('role:assessor|workshop');
 
         Route::prefix('regulator')->middleware('role:regulator')->group(function () {

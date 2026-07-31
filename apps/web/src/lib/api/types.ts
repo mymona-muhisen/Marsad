@@ -92,6 +92,17 @@ export type ClaimStatus =
   | 'settled'
   | 'closed'
 
+/** Mirrors `App\Http\Resources\PartsPriceResource` — the price reference. */
+export type PartsPrice = {
+  id: number
+  part_code: string
+  name_ar: string
+  reference_price: string
+  /** Reference data is versioned, never updated in place (CLAUDE.md rule 5). */
+  version: number
+  effective_from: string
+}
+
 /** Mirrors `App\Enums\DispatchStatus`. */
 export type DispatchStatus =
   | 'assigned'
@@ -285,6 +296,8 @@ export type Claim = {
   case_no?: string | null
   claimant_party_id: number
   insurer_org_id: number
+  /** The office the insurer put on this claim; null for a desk assessment. */
+  assessor_org_id: number | null
   status: ClaimStatus
   sla_due_at: string
   /** Server-computed; negative once the deadline has passed. */

@@ -27,6 +27,7 @@ class ClaimResource extends JsonResource
             'case_no' => $this->whenLoaded('case', fn () => $this->case?->case_no),
             'claimant_party_id' => $this->claimant_party_id,
             'insurer_org_id' => $this->insurer_org_id,
+            'assessor_org_id' => $this->assessor_org_id,
             'status' => $this->status,
             'sla_due_at' => $this->sla_due_at,
             /*

@@ -8,6 +8,8 @@ import { CaseDetailPage } from '@/features/cases/CaseDetailPage'
 import { CasesPage } from '@/features/cases/CasesPage'
 import { ClaimDetailPage } from '@/features/claims/ClaimDetailPage'
 import { ClaimsPage } from '@/features/claims/ClaimsPage'
+import { AssignedClaimsPage } from '@/features/assessor/AssignedClaimsPage'
+import { EstimateClaimPage } from '@/features/assessor/EstimateClaimPage'
 import { DispatchesPage } from '@/features/surveyor/DispatchesPage'
 import { QueuePage } from '@/features/adjudication/QueuePage'
 import { ReviewCasePage } from '@/features/adjudication/ReviewCasePage'
@@ -36,6 +38,7 @@ const SECTION_SCREENS: Record<string, ReactElement> = {
   myClaims: <ClaimsPage />,
   adjudicationQueue: <QueuePage />,
   dispatches: <DispatchesPage />,
+  estimates: <AssignedClaimsPage />,
   insurerClaims: <InsurerClaimsPage />,
   insurerPolicies: <InsurerPoliciesPage />,
   slaReport: <SlaReportPage />,
@@ -95,6 +98,13 @@ export function AppRoutes() {
 
             <Route element={<RequireRole allowed={['citizen']} />}>
               <Route path="/app/claims/:claimId" element={<ClaimDetailPage />} />
+            </Route>
+
+            <Route element={<RequireRole allowed={['assessor', 'workshop']} />}>
+              <Route
+                path="/app/estimates/:claimId"
+                element={<EstimateClaimPage />}
+              />
             </Route>
 
             <Route element={<RequireRole allowed={['adjudicator']} />}>
