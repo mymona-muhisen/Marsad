@@ -14,7 +14,6 @@
     "notFoundBody": "The link you opened is invalid or no longer available.",
     "goHome": "Back to home"
   },
-
   "errors": {
     "network": "Could not reach the server. Check your connection and try again.",
     "unexpected": "Something went wrong. Please try again.",
@@ -22,7 +21,6 @@
     "rateLimited": "Too many attempts. Try again in {{seconds}} seconds.",
     "rateLimitedNoDelay": "Too many attempts. Please try again shortly."
   },
-
   "nav": {
     "how": "How it works",
     "audiences": "Who it's for",
@@ -32,7 +30,6 @@
     "logout": "Sign out",
     "report": "Report an accident"
   },
-
   "auth": {
     "title": "Sign in",
     "subtitle": "Enter your phone number and we'll text you a verification code.",
@@ -58,7 +55,6 @@
     "resendIn": "Resend in {{seconds}}s",
     "devHint": "In development the code is written to the server log instead of being sent by SMS."
   },
-
   "verify": {
     "title": "Verify a report",
     "subtitle": "Enter the verification token printed on the report, or open the QR link directly.",
@@ -76,7 +72,6 @@
     "supersededBy": "Superseded by report",
     "privacyNote": "For privacy, this page shows only whether the report is valid — no party names, accident details, or amounts."
   },
-
   "home": {
     "greeting": "Hello, {{name}}",
     "greetingAnonymous": "Welcome",
@@ -87,7 +82,6 @@
     "empty": "No sections are available for your current role.",
     "soon": "Coming soon"
   },
-
   "sections": {
     "myCases": "My cases",
     "myVehicles": "My vehicles & policies",
@@ -104,7 +98,6 @@
     "blackSpots": "Black spots",
     "administration": "Platform administration"
   },
-
   "roles": {
     "citizen": "Citizen",
     "surveyor": "Field surveyor",
@@ -120,7 +113,6 @@
     "admin": "Platform admin",
     "super_admin": "Technical owner"
   },
-
   "caseStatus": {
     "draft": "Draft",
     "submitted": "Reported",
@@ -135,7 +127,6 @@
     "cancelled": "Cancelled",
     "escalated": "Escalated"
   },
-
   "claimStatus": {
     "opened": "Open",
     "info_requested": "Information requested",
@@ -146,13 +137,11 @@
     "settled": "Settled",
     "closed": "Closed"
   },
-
   "caseTrack": {
     "fast_track": "Fast track",
     "dispatch_required": "Surveyor dispatch",
     "police_required": "Referred to the authority"
   },
-
   "cases": {
     "title": "My cases",
     "subtitle": "Every accident you reported or were a party to.",
@@ -160,7 +149,6 @@
     "emptyCta": "Report an accident",
     "occurredAt": "Occurred",
     "open": "View details",
-
     "detail": {
       "caseNo": "Case number",
       "track": "Track",
@@ -170,7 +158,6 @@
       "notFound": "This case does not exist, or you are not allowed to view it.",
       "coordinates": "Coordinates"
     },
-
     "timeline": {
       "title": "Case progress",
       "reported": "Accident reported",
@@ -182,7 +169,6 @@
       "report": "Official report issued",
       "claim": "Claim opened with the insurer"
     },
-
     "evidence": {
       "title": "Evidence",
       "empty": "No evidence uploaded.",
@@ -197,7 +183,6 @@
       },
       "superseded": "Superseded by a newer version"
     },
-
     "decision": {
       "title": "Liability decision",
       "none": "No liability decision has been issued yet.",
@@ -209,7 +194,6 @@
       "otherParty": "Other party",
       "decidedAt": "Decision date"
     },
-
     "objection": {
       "title": "Object to the decision",
       "windowOpen": "You can object within",
@@ -231,21 +215,18 @@
         "rejected": "Objection rejected"
       }
     },
-
     "report": {
       "title": "Official report",
       "reportNo": "Report number",
       "issuedAt": "Issued on",
       "verify": "Verify this report"
     },
-
     "claim": {
       "title": "Claims",
       "openedAt": "Opened",
       "sla": "Binding response deadline"
     }
   },
-
   "join": {
     "title": "Add your account of the accident",
     "subtitle": "An accident you were involved in has been reported. Add your photos and your account so the case is decided from both sides.",
@@ -254,18 +235,15 @@
     "region": "Governorate",
     "invalidToken": "This link is invalid or has expired. Contact the authority to have a new one issued.",
     "whyNoStatement": "We don't show you the other party's account before you write yours — so your statement stays your own.",
-
     "signIn": {
       "title": "Sign in to continue",
       "body": "Use the same phone number that received the message. You cannot join with a different number.",
       "action": "Sign in"
     },
-
     "steps": {
       "photos": "Photos",
       "statement": "Your account"
     },
-
     "statement": {
       "title": "Tell us what happened from your side",
       "label": "Your account",
@@ -273,7 +251,6 @@
       "required": "Write your account of what happened.",
       "tooLong": "Your account is longer than 2000 characters."
     },
-
     "photosRequired": "All four guided photos are required.",
     "next": "Next",
     "previous": "Back",
@@ -281,7 +258,6 @@
     "submitting": "Sending…",
     "phoneMismatch": "Your phone number doesn't match the party named in this accident. Sign in with the number that received the message.",
     "submitFailed": "Could not send your account. Please try again.",
-
     "success": {
       "title": "Your account has been added",
       "body": "The case is now among your cases, and you can follow it at every step.",
@@ -289,7 +265,6 @@
       "myCases": "My cases"
     }
   },
-
   "dashboards": {
     "filters": {
       "from": "From",
@@ -306,7 +281,6 @@
     },
     "tableView": "View as a table",
     "aggregateOnly": "These figures are aggregates only — no case numbers and no party data.",
-
     "sla": {
       "title": "Insurer deadline compliance",
       "subtitle": "Per company: how many claims, how many past the deadline, and the average time to settle.",
@@ -329,7 +303,6 @@
         "avgHours": "Avg hours"
       }
     },
-
     "fraud": {
       "title": "Fraud signals",
       "subtitle": "Signals the system raised automatically. Aggregate counts, no case detail.",
@@ -347,7 +320,6 @@
         "count": "Count"
       }
     },
-
     "density": {
       "title": "Accident density",
       "subtitle": "Accidents grouped into coordinate buckets of roughly 1.1km.",
@@ -363,7 +335,6 @@
         "count": "Accidents"
       }
     },
-
     "blackSpots": {
       "title": "Black spots",
       "subtitle": "The governorates recording the most accidents, ranked.",
@@ -372,7 +343,6 @@
       "topRegion": "Most accidents"
     }
   },
-
   "dispatchStatus": {
     "assigned": "Awaiting your acceptance",
     "accepted": "Accepted",
@@ -380,7 +350,6 @@
     "on_scene": "On scene",
     "completed": "Completed"
   },
-
   "surveyor": {
     "title": "My field assignments",
     "subtitle": "Accidents assigned to you. Newest first.",
@@ -391,7 +360,6 @@
     "noAddress": "No written description of the location.",
     "openCase": "Open the case file",
     "zone": "Zone",
-
     "actions": {
       "accept": "Accept assignment",
       "accepting": "Accepting…",
@@ -407,24 +375,61 @@
       "complete": "Finish inspection and upload evidence",
       "completing": "Uploading…"
     },
-
     "capture": {
       "title": "Inspection evidence",
       "subtitle": "Take at least the four guided photos. The upload tolerates a dropped connection: retrying will not duplicate them.",
       "photosRequired": "All four guided photos are required."
     },
-
     "declined": {
       "title": "You declined this assignment",
       "reason": "Reason"
     },
-
     "completed": {
       "title": "Inspection complete",
       "body": "The evidence is uploaded and the case has moved to liability review."
     }
   },
-
+  "assessor": {
+    "title": "My assigned estimates",
+    "subtitle": "Claims an insurer asked your office to price.",
+    "empty": "Nothing assigned to you right now.",
+    "open": "Open",
+    "claimNo": "Claim",
+    "detail": {
+      "title": "Damage estimate",
+      "back": "Back to my list",
+      "notFound": "This claim does not exist, or it was not assigned to your office.",
+      "existing": "Submitted estimates",
+      "noExisting": "No estimate submitted yet."
+    },
+    "form": {
+      "title": "New estimate",
+      "type": "Estimate type",
+      "types": {
+        "assessor": "Assessor visit",
+        "workshop": "Workshop estimate",
+        "desk": "Desk assessment"
+      },
+      "description": "Line",
+      "descriptionPlaceholder": "For example: front bumper",
+      "part": "Reference part",
+      "partNone": "No reference part (labour or free line)",
+      "qty": "Quantity",
+      "unitPrice": "Unit price (SYP)",
+      "laborHours": "Labour hours",
+      "reference": "Reference price: {{price}}",
+      "deviation": "{{percent}}% above the reference — this line will be flagged for review.",
+      "addLine": "Add a line",
+      "removeLine": "Remove line",
+      "total": "Total",
+      "totalNote": "The total is computed on the server from the lines; this is a preview.",
+      "submit": "Submit estimate",
+      "submitting": "Submitting…",
+      "lineIncomplete": "Complete the line's description and price.",
+      "atLeastOne": "Add at least one line.",
+      "success": "Estimate submitted."
+    }
+  },
   "insurer": {
     "claims": {
       "title": "Incoming claims",
@@ -439,7 +444,6 @@
       "slaBreached": "Past deadline",
       "open": "Open"
     },
-
     "claim": {
       "title": "Claim detail",
       "notFound": "This claim does not exist, or you are not allowed to view it.",
@@ -451,7 +455,6 @@
       "settled": "Settlement recorded",
       "readOnly": "You have read access only — deciding and settling belong to the claims agent."
     },
-
     "decide": {
       "title": "Decision",
       "outcome": "Decision",
@@ -480,7 +483,6 @@
       "submitting": "Recording…",
       "mandatoryNotice": "Every decision is logged with its reason on the claim timeline, and the claimant sees it."
     },
-
     "settle": {
       "title": "Record a settlement",
       "mode": "Settlement mode",
@@ -496,7 +498,6 @@
       "submit": "Record the settlement",
       "submitting": "Recording…"
     },
-
     "policies": {
       "title": "Policy verification requests",
       "subtitle": "Policies citizens added that await verification by your company.",
@@ -519,7 +520,6 @@
       "document": "Attached document"
     }
   },
-
   "adjudication": {
     "queue": {
       "title": "Liability review queue",
@@ -529,7 +529,6 @@
       "statements": "{{count}} statements",
       "review": "Review"
     },
-
     "review": {
       "title": "Review case",
       "notFound": "This case does not exist, or you are not allowed to review it.",
@@ -541,7 +540,6 @@
       "evidenceFor": "{{party}}'s evidence",
       "statementsHint": "Read both accounts side by side before picking a rule. The platform does not analyse the text — the judgement is yours."
     },
-
     "decide": {
       "title": "Decision",
       "scenario": "Applicable rule",
@@ -564,7 +562,6 @@
       "irreversible": "A decision cannot be undone once issued; an objection is the only route to changing it."
     }
   },
-
   "claims": {
     "title": "My claims",
     "subtitle": "Follow your insurance claim step by step, and when the insurer is required to respond.",
@@ -572,7 +569,6 @@
     "openedAt": "Opened",
     "caseNo": "Case",
     "open": "View details",
-
     "sla": {
       "label": "Binding response deadline",
       "remaining": "{{days}}d {{hours}}h left",
@@ -582,14 +578,12 @@
       "breachedHours": "The insurer is {{hours}} hours past the binding deadline",
       "met": "Answered within the binding deadline."
     },
-
     "detail": {
       "title": "Claim details",
       "claimNo": "Claim number",
       "viewCase": "View the case",
       "notFound": "This claim does not exist, or you are not allowed to view it."
     },
-
     "timeline": {
       "title": "Claim progress",
       "empty": "No events recorded yet.",
@@ -604,7 +598,6 @@
       "reason": "Stated reason",
       "note": "Note"
     },
-
     "reasonCodes": {
       "fully_covered": "Fully covered",
       "coverage_limit": "Coverage limit reached",
@@ -615,7 +608,6 @@
       "missing_documents": "Missing documents",
       "need_clarification": "Estimate needs clarification"
     },
-
     "estimates": {
       "title": "Damage estimates",
       "empty": "No damage estimate submitted yet.",
@@ -638,7 +630,6 @@
         "rejected": "Rejected"
       }
     },
-
     "settlement": {
       "title": "Settlement",
       "amount": "Amount",
@@ -649,7 +640,6 @@
       }
     }
   },
-
   "vehicles": {
     "title": "My vehicles",
     "subtitle": "Add your vehicle before reporting an accident — a report is always tied to a vehicle registered in your name.",
@@ -671,7 +661,6 @@
     "modelRequired": "Model is required.",
     "yearRange": "Year must be between 1950 and 2030."
   },
-
   "report": {
     "title": "Report an accident",
     "stepOf": "Step {{current}} of {{total}}",
@@ -679,7 +668,6 @@
     "previous": "Back",
     "draftRestored": "Picked up where you left off — your details and photos are saved on this device.",
     "discardDraft": "Start a new report",
-
     "steps": {
       "vehicle": "Vehicle & time",
       "location": "Location",
@@ -688,7 +676,6 @@
       "statement": "Statement",
       "review": "Review"
     },
-
     "vehicle": {
       "title": "Which vehicle was in the accident?",
       "noVehicles": "You have no registered vehicles. Add one first, then come back to your report.",
@@ -700,7 +687,6 @@
       "injuryNo": "No, material damage only",
       "injuryWarning": "Accidents with injuries are referred to the competent authority, and your report stays on file. Call emergency services immediately if anyone is seriously hurt."
     },
-
     "location": {
       "title": "Where did it happen?",
       "useGps": "Locate me automatically",
@@ -720,7 +706,6 @@
       "addressHint": "Name the street, the nearest landmark, and the direction — this is how a surveyor finds you.",
       "toggleCoordinates": "Enter coordinates manually (advanced)"
     },
-
     "photos": {
       "title": "Photograph the scene",
       "subtitle": "Four photos minimum. Follow the guide frame on each card.",
@@ -750,7 +735,6 @@
         }
       }
     },
-
     "counterparty": {
       "title": "Who was the other party?",
       "subtitle": "We'll text them a link to add their side to the same case.",
@@ -760,7 +744,6 @@
       "hitAndRun": "The other party left the scene (hit and run)",
       "hitAndRunHint": "Choose this and we won't ask for their details; the case is referred to the competent authority."
     },
-
     "statement": {
       "title": "Tell us what happened",
       "label": "Your statement",
@@ -768,7 +751,6 @@
       "counter": "{{count}} / 2000 characters",
       "voiceSoon": "Voice statements are coming soon."
     },
-
     "review": {
       "title": "Review before sending",
       "vehicle": "Vehicle",
@@ -786,7 +768,6 @@
       "yes": "Yes",
       "no": "No"
     },
-
     "errors": {
       "vehicleRequired": "Choose the vehicle involved.",
       "occurredAtRequired": "Enter the date and time of the accident.",
@@ -802,7 +783,6 @@
       "statementTooLong": "The statement is longer than 2000 characters.",
       "submitFailed": "Could not send the report. Your details are saved — try again."
     },
-
     "success": {
       "title": "Your report has been received",
       "caseNo": "Case number",
@@ -825,7 +805,6 @@
       "done": "Back to home"
     }
   },
-
   "landing": {
     "hero": {
       "eyebrow": "A national platform for traffic accidents and motor insurance",
@@ -838,10 +817,26 @@
     },
     "stats": {
       "items": [
-        { "value": "5", "unit": "minutes", "label": "Target time to report from your phone" },
-        { "value": "48", "unit": "hours", "label": "Report issued on the fast track" },
-        { "value": "72", "unit": "hours", "label": "Window to object to a liability decision" },
-        { "value": "12", "unit": "states", "label": "Documented lifecycle for every case" }
+        {
+          "value": "5",
+          "unit": "minutes",
+          "label": "Target time to report from your phone"
+        },
+        {
+          "value": "48",
+          "unit": "hours",
+          "label": "Report issued on the fast track"
+        },
+        {
+          "value": "72",
+          "unit": "hours",
+          "label": "Window to object to a liability decision"
+        },
+        {
+          "value": "12",
+          "unit": "states",
+          "label": "Documented lifecycle for every case"
+        }
       ]
     },
     "problem": {
@@ -938,11 +933,23 @@
     },
     "footer": {
       "platform": "Platform",
-      "platformLinks": ["How it works", "Trust", "FAQ"],
+      "platformLinks": [
+        "How it works",
+        "Trust",
+        "FAQ"
+      ],
       "services": "Services",
-      "servicesLinks": ["Report an accident", "Track a claim", "Verify a report"],
+      "servicesLinks": [
+        "Report an accident",
+        "Track a claim",
+        "Verify a report"
+      ],
       "partners": "Partners",
-      "partnersLinks": ["Insurance companies", "Accredited workshops", "Regulators"],
+      "partnersLinks": [
+        "Insurance companies",
+        "Accredited workshops",
+        "Regulators"
+      ],
       "legal": "All rights reserved",
       "note": "Graduation project — preview build"
     }

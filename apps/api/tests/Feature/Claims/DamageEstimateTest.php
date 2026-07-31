@@ -3,8 +3,10 @@
 namespace Tests\Feature\Claims;
 
 use App\Enums\ClaimStatus;
+use App\Enums\OrganizationType;
 use App\Enums\RoleName;
 use App\Models\Claim;
+use App\Models\Organization;
 use App\Models\PartsPrice;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -22,9 +24,23 @@ class DamageEstimateTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
-    private function workshopUser(): User
+    /**
+     * A workshop belonging to the office the claim is assigned to.
+     *
+     * The assignment is not decoration: since `claims.assessor_org_id` exists,
+     * `ClaimPolicy::estimate` refuses an office the insurer never put on the
+     * claim. These tests used to pass without one because nothing was checked.
+     */
+    private function workshopUser(Claim $claim): User
     {
-        $user = User::factory()->create();
+        $organization = Organization::factory()->create([
+            'type' => OrganizationType::Workshop->value,
+            'status' => 'active',
+        ]);
+
+        $claim->forceFill(['assessor_org_id' => $organization->id])->save();
+
+        $user = User::factory()->create(['organization_id' => $organization->id]);
         $user->assignRole(RoleName::Workshop->value);
 
         return $user;
@@ -33,7 +49,7 @@ class DamageEstimateTest extends TestCase
     public function test_submitting_an_estimate_recalculates_totals_and_moves_claim_to_assessing(): void
     {
         $claim = Claim::factory()->create(['status' => ClaimStatus::Opened->value]);
-        $workshop = $this->workshopUser();
+        $workshop = $this->workshopUser($claim);
 
         $response = $this->actingAs($workshop)->postJson("/api/v1/claims/{$claim->id}/estimates", [
             'type' => 'workshop',
@@ -52,7 +68,7 @@ class DamageEstimateTest extends TestCase
     {
         PartsPrice::factory()->create(['part_code' => 'FRONT_BUMPER', 'reference_price' => 800000]);
         $claim = Claim::factory()->create();
-        $workshop = $this->workshopUser();
+        $workshop = $this->workshopUser($claim);
 
         $response = $this->actingAs($workshop)->postJson("/api/v1/claims/{$claim->id}/estimates", [
             'type' => 'workshop',
@@ -69,7 +85,7 @@ class DamageEstimateTest extends TestCase
     {
         PartsPrice::factory()->create(['part_code' => 'FRONT_BUMPER', 'reference_price' => 800000]);
         $claim = Claim::factory()->create();
-        $workshop = $this->workshopUser();
+        $workshop = $this->workshopUser($claim);
 
         $response = $this->actingAs($workshop)->postJson("/api/v1/claims/{$claim->id}/estimates", [
             'type' => 'workshop',

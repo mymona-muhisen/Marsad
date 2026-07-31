@@ -228,9 +228,12 @@ Notation: **bold** = NOT NULL. `UQ` = unique, `IX` = index, `CK` = check constra
 | **case_id** | FK → accident_cases | RESTRICT |
 | **claimant_party_id** | FK → case_parties | RESTRICT, `UQ(case_id, claimant_party_id)` — one claim per party per case |
 | **insurer_org_id** | FK → organizations | RESTRICT |
+| assessor_org_id | FK → organizations | nullable, RESTRICT — the assessor office or workshop the insurer put on this claim (doc 01 §B.3 stage 6). Null for a desk assessment by the insurer's own staff. |
 | **status** | VARCHAR(30) | CK: opened, info_requested, assessing, approved, partially_approved, rejected, settled, closed |
 | **sla_due_at** | DATETIME | IX — regulator breach query |
-| IX | | `IX(insurer_org_id, status)` — the insurer console's main query |
+| IX | | `IX(insurer_org_id, status)` — the insurer console's main query · `IX(assessor_org_id, status)` — the assessor's work list |
+
+*Decision:* assignment is a column on `claims`, not a join table, because a claim has at most one assessor at a time and reassignment overwrites rather than accumulating — the history that matters is already in `claim_events`. Without this column `SubmitEstimateRequest` had nothing to authorize against, so any assessor could price any claim in the country.
 
 **`claim_events`** *(append-only timeline)*
 | **claim_id** FK RESTRICT · actor_id FK users RESTRICT, nullable (see implementation note) · **action** VARCHAR(40) · reason_code VARCHAR(20) nullable · note TEXT nullable · **created_at** · IX(claim_id, created_at) |

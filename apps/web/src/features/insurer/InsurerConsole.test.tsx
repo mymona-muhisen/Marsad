@@ -18,6 +18,7 @@ function claim(overrides: Partial<Claim> = {}): Claim {
     case_no: 'MC-26-CLAIM1',
     claimant_party_id: 11,
     insurer_org_id: 1,
+    assessor_org_id: null,
     status: 'assessing',
     sla_due_at: '2026-08-02T10:00:00.000000Z',
     sla_seconds_remaining: 3 * 86400,

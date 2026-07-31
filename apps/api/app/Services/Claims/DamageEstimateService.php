@@ -39,7 +39,11 @@ class DamageEstimateService
             $total = 0;
 
             foreach ($items as $item) {
-                $partPrice = $item['part_code'] !== null ? $this->currentPartPrice($item['part_code']) : null;
+                // `part_code` is nullable in SubmitEstimateRequest, so an
+                // omitted key is valid input — a labour line has no part.
+                // Reading it directly raised "Undefined array key" instead.
+                $partCode = $item['part_code'] ?? null;
+                $partPrice = $partCode !== null ? $this->currentPartPrice($partCode) : null;
                 $lineTotal = $item['qty'] * $item['unit_price'];
 
                 EstimateItem::create([

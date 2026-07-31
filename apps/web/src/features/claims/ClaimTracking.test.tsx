@@ -16,6 +16,7 @@ function makeClaim(overrides: Partial<Claim> = {}): Claim {
     case_no: 'MC-26-ABC123',
     claimant_party_id: 11,
     insurer_org_id: 2,
+    assessor_org_id: null,
     status: 'assessing',
     sla_due_at: '2026-08-03T09:00:00.000000Z',
     sla_seconds_remaining: 30 * HOUR,

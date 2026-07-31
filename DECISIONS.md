@@ -798,6 +798,30 @@ Every case in `DemoSeeder` is `fast_track`, so no dispatch was ever auto-assigne
 
 **Impact:** Two names for one concept across the API, which a future consumer will trip over. The frontend client documents the discrepancy at the call site. If it is ever unified, `photo_keys` is the one to keep — it is the older contract and the only one that mandates the key.
 
+---
+
+### 2026-07-31 (Assessor estimates — closing an open authorization)
+
+**Decision:** Added `claims.assessor_org_id` (nullable FK, additive migration, doc 04 §2.5 updated), a `POST /insurer/claims/{claim}/assessor` assignment endpoint for the insurer agent, `ClaimPolicy::estimate` scoping submission to the assigned office, and `GET /assessor/claims` + `GET /assessor/parts-prices`.
+
+**Reason:** `SubmitEstimateRequest::authorize()` returned a bare `true`. The role middleware let any `assessor` or `workshop` through, and nothing tied them to the claim — so **any assessor office in the country could price any claim**, and there was no way to list which claims were theirs because no such relationship existed. Doc 01 §B.3 stage 6 has the insurer choosing who assesses, but no column ever recorded that choice; the missing schema was what forced the permissive `true`.
+
+Assignment is a column rather than a join table: a claim has at most one assessor at a time, reassignment overwrites, and the history worth keeping is already appended to `claim_events`.
+
+**Impact:** Existing estimate tests failed on the new rule and were corrected — they had been passing precisely because nothing was checked. `assessor_org_id` is nullable, so a desk assessment by the insurer's own staff assigns nobody; a claim with no assignment now accepts no external estimate at all, which is the intended behaviour but is stricter than before for any workflow that relied on the gap.
+
+---
+
+### 2026-07-31 (Assessor estimates — a reference you can read)
+
+**Decision:** `GET /assessor/parts-prices` returns the in-force version of every part, and the estimate builder shows the reference price beside each line plus a warning when a line will be flagged.
+
+**Reason:** `DamageEstimateService` flags any line deviating more than `claims.deviation_threshold_percent` from the reference list, and that list had no endpoint — an assessor was being judged against prices they could not see, discovering the flag only after submitting. `PartsPriceService::current()` mirrors `DamageEstimateService::currentPartPrice()` exactly (highest `effective_from`, then highest `version`, ignoring future-dated rows); if the two ever disagree the form would price against one revision while the flag judged another.
+
+**Impact:** The 15% threshold is duplicated in `apps/web/src/features/assessor/estimate.ts`, like the adjudicator's override rule — the server still decides, but a form that only reveals the flag afterwards teaches nothing. Both use `>` rather than `>=`, and both compare absolute distance, so an implausibly cheap part is flagged as readily as an inflated one.
+
+**Found while testing:** `DamageEstimateService` read `$item['part_code']` directly although `SubmitEstimateRequest` marks it `nullable` — omitting the key, which the validation permits, raised "Undefined array key" and 500'd. A labour line with no part is exactly that case. `labor_hours` already guarded with `?? null`; `part_code` was missed. Fixed and covered.
+
 ## Template
 
 ### YYYY-MM-DD

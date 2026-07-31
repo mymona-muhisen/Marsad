@@ -93,6 +93,16 @@ class ClaimService
     }
 
     /**
+     * Claims an assessor office or workshop was actually put on.
+     *
+     * @return Builder<Claim>
+     */
+    public function forAssessor(User $user): Builder
+    {
+        return Claim::query()->where('assessor_org_id', $user->organization_id);
+    }
+
+    /**
      * @return Builder<Claim>
      */
     public function forClaimant(User $user): Builder

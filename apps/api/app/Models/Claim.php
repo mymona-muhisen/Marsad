@@ -24,6 +24,7 @@ class Claim extends Model
         'case_id',
         'claimant_party_id',
         'insurer_org_id',
+        'assessor_org_id',
         'status',
         'sla_due_at',
     ];
@@ -53,6 +54,16 @@ class Claim extends Model
     public function claimantParty(): BelongsTo
     {
         return $this->belongsTo(CaseParty::class, 'claimant_party_id');
+    }
+
+    /**
+     * The assessor office or workshop the insurer put on this claim.
+     *
+     * @return BelongsTo<Organization, $this>
+     */
+    public function assessor(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'assessor_org_id');
     }
 
     /**
