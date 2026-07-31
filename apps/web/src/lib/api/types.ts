@@ -92,6 +92,40 @@ export type ClaimStatus =
   | 'settled'
   | 'closed'
 
+/** Mirrors `App\Enums\DispatchStatus`. */
+export type DispatchStatus =
+  | 'assigned'
+  | 'accepted'
+  | 'declined'
+  | 'on_scene'
+  | 'completed'
+
+/**
+ * Mirrors `App\Http\Resources\DispatchResource`. The nested `case` is what
+ * makes a dispatch actionable — without an address there is nowhere to go.
+ */
+export type Dispatch = {
+  id: number
+  case_id: number
+  zone: string | null
+  status: DispatchStatus
+  decline_reason: string | null
+  assigned_at: string | null
+  accepted_at: string | null
+  completed_at: string | null
+  case?: {
+    case_no: string
+    occurred_at: string
+    region: string | null
+    location_description: string | null
+    location_verified: boolean
+    lat: number
+    lng: number
+    injury_flag: boolean
+    status: CaseStatus
+  }
+}
+
 /** Mirrors `App\Http\Resources\OrganizationResource`. */
 export type Organization = {
   id: number

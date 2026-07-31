@@ -6,6 +6,7 @@ use App\Enums\CasePartyRole;
 use App\Enums\CaseStatus;
 use App\Enums\CaseTrack;
 use App\Enums\ClaimStatus;
+use App\Enums\DispatchStatus;
 use App\Enums\FaultDecisionStatus;
 use App\Enums\OrganizationType;
 use App\Enums\ReportStatus;
@@ -13,6 +14,7 @@ use App\Enums\RoleName;
 use App\Models\AccidentCase;
 use App\Models\CaseParty;
 use App\Models\Claim;
+use App\Models\Dispatch;
 use App\Models\FaultAllocation;
 use App\Models\FaultDecision;
 use App\Models\InsurancePolicy;
@@ -64,6 +66,52 @@ class DemoSeeder extends Seeder
         foreach (ClaimStatus::cases() as $status) {
             $this->makeClaimInState($status, $this->insurer);
         }
+
+        $this->makeDispatchForDemoSurveyor();
+    }
+
+    /**
+     * A case waiting on the demo surveyor.
+     *
+     * Every case above is seeded `fast_track`, so nothing ever auto-assigned a
+     * dispatch and the surveyor's screen was empty on a fresh database.
+     */
+    private function makeDispatchForDemoSurveyor(): void
+    {
+        $surveyor = $this->demoUser(DemoUserSeeder::SURVEYOR_PHONE);
+
+        if (! $surveyor) {
+            return;
+        }
+
+        $vehicle = Vehicle::factory()->create(['owner_id' => $this->citizen->id]);
+
+        $case = AccidentCase::factory()->create([
+            'status' => CaseStatus::UnderReview->value,
+            'track' => CaseTrack::DispatchRequired->value,
+            'reported_by' => $this->citizen->id,
+            // Matches the surveyor's zone (config/zones.php) so the row also
+            // demonstrates zone-based routing rather than a blind assignment.
+            'region' => $surveyor->zone,
+            'location_verified' => false,
+            'location_description' => 'أوتوستراد المزة، مقابل مشفى الشامي، باتجاه الشيخ سعد.',
+        ]);
+
+        CaseParty::factory()->create([
+            'case_id' => $case->id,
+            'user_id' => $this->citizen->id,
+            'vehicle_id' => $vehicle->id,
+            'policy_id' => $this->verifiedPolicy($vehicle)->id,
+            'role' => CasePartyRole::Reporter->value,
+        ]);
+
+        Dispatch::factory()->create([
+            'case_id' => $case->id,
+            'surveyor_id' => $surveyor->id,
+            'zone' => $surveyor->zone,
+            'status' => DispatchStatus::Assigned->value,
+            'assigned_at' => now()->subMinutes(20),
+        ]);
     }
 
     /** Null when DemoUserSeeder has not run — the fixtures still work without it. */

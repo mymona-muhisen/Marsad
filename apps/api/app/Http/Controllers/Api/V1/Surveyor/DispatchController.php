@@ -18,6 +18,9 @@ class DispatchController extends Controller
     public function index(Request $request): JsonResponse
     {
         $dispatches = $this->dispatches->forSurveyor($request->user())
+            // The address lives on the case; a dispatch row alone is unusable.
+            ->with('case')
+            ->latest('assigned_at')
             ->paginate(min($request->integer('per_page', 15), 100));
 
         return DispatchResource::collection($dispatches)->response();
@@ -29,14 +32,14 @@ class DispatchController extends Controller
 
         $dispatch = $this->dispatches->accept($dispatch);
 
-        return (new DispatchResource($dispatch))->response();
+        return (new DispatchResource($dispatch->load('case')))->response();
     }
 
     public function decline(DeclineDispatchRequest $request, Dispatch $dispatch): JsonResponse
     {
         $dispatch = $this->dispatches->decline($dispatch, $request->validated('reason'));
 
-        return (new DispatchResource($dispatch))->response();
+        return (new DispatchResource($dispatch->load('case')))->response();
     }
 
     public function markOnScene(Request $request, Dispatch $dispatch): JsonResponse
@@ -45,7 +48,7 @@ class DispatchController extends Controller
 
         $dispatch = $this->dispatches->markOnScene($dispatch);
 
-        return (new DispatchResource($dispatch))->response();
+        return (new DispatchResource($dispatch->load('case')))->response();
     }
 
     public function complete(CompleteDispatchRequest $request, Dispatch $dispatch): JsonResponse
@@ -57,6 +60,6 @@ class DispatchController extends Controller
             $request->input('photo_keys', []),
         );
 
-        return (new DispatchResource($dispatch))->response();
+        return (new DispatchResource($dispatch->load('case')))->response();
     }
 }

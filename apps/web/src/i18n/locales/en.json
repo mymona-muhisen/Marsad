@@ -373,6 +373,58 @@
     }
   },
 
+  "dispatchStatus": {
+    "assigned": "Awaiting your acceptance",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "on_scene": "On scene",
+    "completed": "Completed"
+  },
+
+  "surveyor": {
+    "title": "My field assignments",
+    "subtitle": "Accidents assigned to you. Newest first.",
+    "empty": "Nothing assigned to you right now.",
+    "injuryWarning": "This report involves injuries — make sure emergency services are there before inspecting.",
+    "assignedAt": "Assigned",
+    "unverifiedLocation": "Location not device-confirmed — rely on the written description.",
+    "noAddress": "No written description of the location.",
+    "openCase": "Open the case file",
+    "zone": "Zone",
+
+    "actions": {
+      "accept": "Accept assignment",
+      "accepting": "Accepting…",
+      "decline": "Decline",
+      "declineTitle": "Reason for declining",
+      "declinePlaceholder": "For example: already on another job in a distant zone.",
+      "declineReasonRequired": "A reason is required.",
+      "confirmDecline": "Confirm decline",
+      "declineHint": "The assignment passes to the next surveyor automatically, and your decline stays on record.",
+      "cancel": "Cancel",
+      "onScene": "I've arrived on scene",
+      "markingOnScene": "Recording…",
+      "complete": "Finish inspection and upload evidence",
+      "completing": "Uploading…"
+    },
+
+    "capture": {
+      "title": "Inspection evidence",
+      "subtitle": "Take at least the four guided photos. The upload tolerates a dropped connection: retrying will not duplicate them.",
+      "photosRequired": "All four guided photos are required."
+    },
+
+    "declined": {
+      "title": "You declined this assignment",
+      "reason": "Reason"
+    },
+
+    "completed": {
+      "title": "Inspection complete",
+      "body": "The evidence is uploaded and the case has moved to liability review."
+    }
+  },
+
   "insurer": {
     "claims": {
       "title": "Incoming claims",
