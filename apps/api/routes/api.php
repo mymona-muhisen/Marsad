@@ -3,6 +3,9 @@
 use App\Http\Controllers\Api\V1\Adjudication\AdjudicationController;
 use App\Http\Controllers\Api\V1\Adjudication\LiabilityRuleController;
 use App\Http\Controllers\Api\V1\Adjudication\ObjectionController;
+use App\Http\Controllers\Api\V1\Admin\AuditLogController;
+use App\Http\Controllers\Api\V1\Admin\LiabilityRuleController as AdminLiabilityRuleController;
+use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\V1\Assessor\ClaimController as AssessorClaimController;
 use App\Http\Controllers\Api\V1\Assessor\PartsPriceController;
 use App\Http\Controllers\Api\V1\Auth\OtpController;
@@ -120,6 +123,20 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::post('claims/{claim}/estimates', [EstimateController::class, 'store'])->middleware('role:assessor|workshop');
+
+        Route::prefix('admin')->group(function () {
+            // User and role administration (doc 01 §B.4 — the admin's line).
+            Route::middleware('role:admin|super_admin')->group(function () {
+                Route::get('users', [AdminUserController::class, 'index']);
+                Route::post('users/{user}/roles', [AdminUserController::class, 'syncRoles']);
+                Route::post('liability-rules', [AdminLiabilityRuleController::class, 'store']);
+            });
+
+            // "Everything + audit log access" is super_admin's alone: the
+            // trail records what admins did, so admins do not police it.
+            Route::get('audit-logs', [AuditLogController::class, 'index'])
+                ->middleware('role:super_admin');
+        });
 
         Route::prefix('regulator')->middleware('role:regulator')->group(function () {
             Route::get('sla-report', [SlaReportController::class, 'show']);

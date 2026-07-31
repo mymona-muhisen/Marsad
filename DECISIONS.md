@@ -822,6 +822,46 @@ Assignment is a column rather than a join table: a claim has at most one assesso
 
 **Found while testing:** `DamageEstimateService` read `$item['part_code']` directly although `SubmitEstimateRequest` marks it `nullable` — omitting the key, which the validation permits, raised "Undefined array key" and 500'd. A labour line with no part is exactly that case. `labor_hours` already guarded with `?? null`; `part_code` was missed. Fixed and covered.
 
+---
+
+### 2026-07-31 (Admin console — closing the other half of rule #9)
+
+**Decision:** Role changes and liability-rule versions are now written to `audit_logs` explicitly by `RoleAssignmentService` and `LiabilityRuleAdminService`, rather than by `AuditObserver`.
+
+**Reason:** CLAUDE.md rule #9 names four auditable things — decisions, claims, **role changes**, **reference data** — and the observer only ever covered the first two. Role changes cannot be observed: spatie writes `model_has_roles` directly, so no Eloquent model event fires. Building a role-management console without closing this would have widened exactly the gap the rule exists to prevent — the console's whole purpose is privileged mutation.
+
+**Impact:** Two audit paths now exist (observer for models, explicit calls for everything else), so a new privileged action needs a deliberate decision about which applies. An unchanged role set writes no row: a trail padded with no-ops is a trail nobody reads.
+
+---
+
+### 2026-07-31 (Admin console — escalation guards)
+
+**Decision:** `super_admin` is a reserved role only a `super_admin` may grant or revoke, and nobody may strip their own last administrative role. Both are service-layer rules with tests; the UI hides the reserved checkbox rather than offering one that guarantees a 422.
+
+**Reason:** An `admin` who can edit roles can otherwise hand themselves `super_admin` and inherit audit-log access — privilege escalation through the very screen meant to govern privilege. Doc 01 §B.4 separates the two roles precisely on that line ("Everything + system configuration, audit log access"). The self-demotion guard is the mirror image: the console has no recovery path if the last admin removes their own access.
+
+**Impact:** The audit log is `super_admin` only, because the trail records what admins did and admins should not police it. A deployment whose only `super_admin` account is lost has no in-app recovery — that is deliberate, but it means the seeded `0900000013` account matters more than it looks.
+
+---
+
+### 2026-07-31 (Liability matrix editing)
+
+**Decision:** `POST /admin/liability-rules` publishes a **new version** — closing the current row with `effective_to` and inserting a successor. There is no update or delete endpoint, and a version cannot be back-dated before the one it supersedes.
+
+**Reason:** CLAUDE.md rule #5, made concrete: `fault_decisions.rule_id` pins the exact version a decision was made under, so editing a row in place would silently rewrite the cited justification of every decision already issued. Future-dating is the intended use — a matrix change is announced, not applied retroactively.
+
+**Impact:** Correcting a typo in a description also mints a version, which will make the matrix history noisier than a mutable table would. That is the cost of the guarantee, and the alternative (an in-place "cosmetic edit" path) is exactly the door rule #5 closes.
+
+---
+
+### 2026-07-31 (Test suite flakiness)
+
+**Decision:** Raised Testing Library's `asyncUtilTimeout` to 3s in `src/test/setup.ts`.
+
+**Reason:** With 27 test files running in parallel the suite began failing intermittently — a *different* test on each run, all passing in isolation. Every one of these assertions waits on a React Query round trip through MSW, and the 1s default is a wall-clock budget that a loaded machine blows past. The failures were environmental, not behavioural; chasing them per-test would have been fixing the wrong thing.
+
+**Impact:** A genuinely stuck query now takes three seconds to report instead of one. If the suite ever slows to where 3s is marginal again, the answer is sharding or `--pool=forks`, not another increase.
+
 ## Template
 
 ### YYYY-MM-DD

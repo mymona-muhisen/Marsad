@@ -389,6 +389,58 @@
       "body": "The evidence is uploaded and the case has moved to liability review."
     }
   },
+  "admin": {
+    "title": "Administration",
+    "tabs": {
+      "users": "Users & roles",
+      "audit": "Audit trail",
+      "matrix": "Liability matrix"
+    },
+    "users": {
+      "search": "Search by name or phone",
+      "searchPlaceholder": "For example: 0900000001",
+      "filterRole": "Filter by role",
+      "allRoles": "All roles",
+      "empty": "No matching users.",
+      "noRoles": "No roles",
+      "edit": "Edit roles",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "reservedHint": "Only a super admin can grant or revoke the super admin role."
+    },
+    "audit": {
+      "subtitle": "Every privileged change, with who did it and when. Read-only — the trail is append-only.",
+      "empty": "No entries.",
+      "actor": "Actor",
+      "action": "Action",
+      "entity": "Record",
+      "when": "When",
+      "system": "System",
+      "filterEntity": "Filter by record",
+      "allEntities": "All records",
+      "actions": {
+        "created": "Created",
+        "updated": "Updated",
+        "roles_synced": "Roles changed",
+        "liability_rule_published": "Rule version published"
+      }
+    },
+    "matrix": {
+      "subtitle": "Publish a new version of a rule. Existing versions are never edited — issued decisions are pinned to theirs.",
+      "scenario": "Scenario code",
+      "scenarioPlaceholder": "REAR_END",
+      "description": "Description (Arabic)",
+      "splitA": "First party's share",
+      "splitB": "Second party's share",
+      "effectiveFrom": "Effective from",
+      "mustTotal": "The two shares must total 100.",
+      "publish": "Publish version",
+      "publishing": "Publishing…",
+      "success": "New version published.",
+      "currentTitle": "Rules in force"
+    }
+  },
   "assessor": {
     "title": "My assigned estimates",
     "subtitle": "Claims an insurer asked your office to price.",
