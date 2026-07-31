@@ -33,6 +33,10 @@ php artisan serve                 # http://127.0.0.1:8000
 cd ../web && npm run dev          # http://localhost:5173
 ```
 
+> `docker compose up --build` starts all of this in one command, including the worker and
+> a scheduler — see [README.md](README.md). It has not been booted end to end, so for the
+> defense itself prefer the manual steps above, which have.
+
 Also open a fifth terminal tailing the log — **this is where every OTP and SMS appears**, because
 the `SmsGateway` adapter runs in log mode (CLAUDE.md rule 4, no real carrier):
 

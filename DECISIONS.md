@@ -862,6 +862,20 @@ Assignment is a column rather than a join table: a claim has at most one assesso
 
 **Impact:** A genuinely stuck query now takes three seconds to report instead of one. If the suite ever slows to where 3s is marginal again, the answer is sharding or `--pool=forks`, not another increase.
 
+---
+
+### 2026-07-31 (docker-compose)
+
+**Decision:** The compose stack runs eight services — MySQL, Redis, Mailpit, a one-shot `api-migrate`, the API, a queue worker, a scheduler, and the Vite dev server. It sets `QUEUE_CONNECTION=redis`, uses Mailpit in place of the MailHog doc 06 names, and offsets MySQL to 3307 and Redis to 6380.
+
+**Reason:** The worker and scheduler are services, not afterthoughts: verifying DEMO.md showed that without a worker no signed PDF is generated and there is no QR to verify, and without a scheduler the 72-hour objection window never lapses so no claim ever opens on its own. A stack that omits them looks complete and silently isn't. Migrations run in their own one-shot service because three containers share the image and would otherwise race each other into building the same schema; the seed is guarded by a sentinel file since `DemoSeeder` is not idempotent — it creates a fresh case in every lifecycle state per run.
+
+Redis: the `database` default recorded earlier exists *only* because no local Redis server was available. Compose provides one, so this is where the target CLAUDE.md actually specifies becomes reachable. Mailpit: MailHog is unmaintained and ships no arm64 image; same SMTP catch-all role. Ports are offset because this project is developed against XAMPP, whose MySQL already holds 3306 — binding there would fail on the developer's own machine.
+
+**Impact:** **The stack has never been booted.** Docker is not installed in this environment, so unlike every other claim in this file it was verified by parsing the YAML and checking the dependency graph, not by running it. The most likely failure points are the `pecl install redis` build step and the healthcheck commands. README and DEMO.md both say so, and DEMO.md steers the defense itself to the manual path that has been exercised end to end.
+
+Mailpit will sit empty: nothing sends mail (`NotificationChannel` is `sms`/`inapp`, and there is no `Mail::` call in the codebase). It is included so that mail, if ever added, is caught rather than dropped by `MAIL_MAILER=log`.
+
 ## Template
 
 ### YYYY-MM-DD

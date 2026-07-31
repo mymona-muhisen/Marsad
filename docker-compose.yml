@@ -1,0 +1,178 @@
+# Marsad — development / demo stack.
+#
+# Brings up everything DEMO.md needs, including the two services that are easy
+# to forget when running by hand: the queue worker (no worker, no signed PDF,
+# no QR to verify) and the scheduler (no scheduler, objection windows never
+# close and SLA breaches are never flagged).
+#
+#   docker compose up --build
+#   web  → http://localhost:5173
+#   api  → http://localhost:8000
+#   mail → http://localhost:8025
+#
+# Ports are deliberately offset from the defaults: this project is developed
+# against XAMPP, whose MySQL already holds 3306.
+
+name: marsad
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: marsad
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # Everything else waits on this: Laravel exits rather than retries if the
+      # database is not accepting connections when it first boots.
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-proot']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6380:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    # Mailpit rather than MailHog, which doc 06 names: MailHog is unmaintained
+    # and its image lacks an arm64 build. Same role, same SMTP catch-all.
+    #
+    # Nothing in the app sends mail today — NotificationChannel is sms|inapp
+    # and there is no Mail:: call anywhere — so this inbox stays empty. It is
+    # here so that mail, if it is ever added, is caught rather than silently
+    # dropped by MAIL_MAILER=log.
+    image: axllent/mailpit:latest
+    ports:
+      - '8025:8025'
+      - '1025:1025'
+
+  api:
+    build:
+      context: ./apps/api
+    environment: &api-env
+      APP_NAME: Marsad
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      # Dev-only, committed on purpose so the stack boots with no setup step.
+      # Generate a fresh one for anything reachable from outside your machine.
+      APP_KEY: base64:Dt5Pi21fb9mCC7VojVE1yWVHLP69qq8TB2bNTrl3Tr4=
+      APP_URL: http://localhost:8000
+
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: '3306'
+      DB_DATABASE: marsad
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+      # DECISIONS.md records `database` as the local default only because no
+      # Redis server was available. Compose provides one, so this stack runs
+      # the target CLAUDE.md actually specifies.
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: '1025'
+
+      # The OTP is written to the log, not sent — read it with
+      # `docker compose logs -f api` (CLAUDE.md rule #4, log SmsGateway).
+      SMS_DRIVER: log
+    ports:
+      - '8000:8000'
+    depends_on:
+      # Not just "mysql is up" — the schema has to exist, or the first request
+      # answers with a missing-table error instead of data.
+      api-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    volumes:
+      - api-storage:/app/storage/app
+    healthcheck:
+      test:
+        - CMD
+        - php
+        - -r
+        - "exit(@fsockopen('127.0.0.1', 8000) ? 0 : 1);"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Migrations and the one-time seed run here and nowhere else, so the worker
+  # and scheduler cannot race the api into building the same schema.
+  api-migrate:
+    build:
+      context: ./apps/api
+    environment:
+      <<: *api-env
+      RUN_MIGRATIONS: 'true'
+    command: ['php', '-r', 'echo "schema ready\n";']
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - api-storage:/app/storage/app
+    restart: 'no'
+
+  queue:
+    build:
+      context: ./apps/api
+    environment: *api-env
+    command: ['php', 'artisan', 'queue:work', '--tries=3', '--timeout=120']
+    depends_on:
+      api-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    volumes:
+      - api-storage:/app/storage/app
+    restart: unless-stopped
+
+  scheduler:
+    build:
+      context: ./apps/api
+    environment: *api-env
+    # The four marsad:* commands in routes/console.php. Without this the 72h
+    # objection window never lapses, so no case reaches `final` and no claim
+    # ever opens on its own.
+    command: ['php', 'artisan', 'schedule:work']
+    depends_on:
+      api-migrate:
+        condition: service_completed_successfully
+    volumes:
+      - api-storage:/app/storage/app
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./apps/web
+    environment:
+      # vite.config.ts reads this; inside the network the api is a hostname,
+      # not 127.0.0.1.
+      VITE_API_PROXY_TARGET: http://api:8000
+    ports:
+      - '5173:5173'
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+  # Evidence photos and generated report PDFs are written here, so they
+  # survive a rebuild and are shared with the worker that generates them.
+  api-storage:
