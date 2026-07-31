@@ -59,6 +59,10 @@ npm run check    # eslint + typecheck + vitest
 
 ## Demo sign-ins (dev only)
 
+> For a scripted end-to-end walkthrough (report → adjudicate → claim → settle → verify QR), see
+> [DEMO.md](DEMO.md). It includes the two steps that are easy to miss: the queue worker must be
+> running, and the 72-hour objection window has to be closed deliberately.
+
 `migrate:fresh --seed` creates one account per role and prints the table. Sign in at `/login` with
 the phone, then read the OTP out of `storage/logs/laravel.log` (or run `php artisan pail` to watch
 it live). These are seeded only when the app is **not** in production.

@@ -15,6 +15,7 @@ use App\Models\CaseParty;
 use App\Models\Claim;
 use App\Models\FaultAllocation;
 use App\Models\FaultDecision;
+use App\Models\InsurancePolicy;
 use App\Models\Organization;
 use App\Models\Report;
 use App\Models\User;
@@ -34,9 +35,11 @@ class DemoSeeder extends Seeder
 
     private User $citizen;
 
+    private Organization $insurer;
+
     public function run(): void
     {
-        $insurer = Organization::query()->where('type', OrganizationType::Insurer->value)->first()
+        $this->insurer = Organization::query()->where('type', OrganizationType::Insurer->value)->first()
             ?? Organization::factory()->create(['type' => OrganizationType::Insurer->value]);
 
         // Hang the fixtures off the fixed demo sign-ins rather than throwaway
@@ -59,7 +62,7 @@ class DemoSeeder extends Seeder
         }
 
         foreach (ClaimStatus::cases() as $status) {
-            $this->makeClaimInState($status, $insurer);
+            $this->makeClaimInState($status, $this->insurer);
         }
     }
 
@@ -67,6 +70,24 @@ class DemoSeeder extends Seeder
     private function demoUser(string $phone): ?User
     {
         return User::query()->where('phone', $phone)->first();
+    }
+
+    /**
+     * A verified, in-force policy for a demo vehicle.
+     *
+     * Without one the demo cannot show the chain the defense is built around:
+     * `ClaimService::openClaimsForCase()` skips any party whose counterpart has
+     * no `policy_id`, so a case reaching `final` opened no claim at all and the
+     * only claims in the database were ones this seeder fabricated directly.
+     */
+    private function verifiedPolicy(Vehicle $vehicle): InsurancePolicy
+    {
+        return InsurancePolicy::factory()->verified()->create([
+            'vehicle_id' => $vehicle->id,
+            'insurer_org_id' => $this->insurer->id,
+            'start_date' => now()->subMonths(6),
+            'end_date' => now()->addMonths(6),
+        ]);
     }
 
     private function makeCaseInState(CaseStatus $status): AccidentCase
@@ -86,6 +107,7 @@ class DemoSeeder extends Seeder
             'case_id' => $case->id,
             'user_id' => $reporter->id,
             'vehicle_id' => $vehicle->id,
+            'policy_id' => $this->verifiedPolicy($vehicle)->id,
             'role' => CasePartyRole::Reporter->value,
         ]);
 
@@ -105,9 +127,14 @@ class DemoSeeder extends Seeder
             ]);
         } elseif ($hasJoinedCounterparty) {
             $counterparty = User::factory()->create();
+            $counterpartyVehicle = Vehicle::factory()->create(['owner_id' => $counterparty->id]);
             $counterpartyParty = CaseParty::factory()->counterparty()->create([
                 'case_id' => $case->id,
                 'user_id' => $counterparty->id,
+                'vehicle_id' => $counterpartyVehicle->id,
+                // The at-fault side needs an insurer for a claim to open
+                // against — this is what makes the demo chain reach a claim.
+                'policy_id' => $this->verifiedPolicy($counterpartyVehicle)->id,
                 'joined_at' => now()->subDay(),
             ]);
         }
