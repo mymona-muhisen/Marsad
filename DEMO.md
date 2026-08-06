@@ -33,9 +33,11 @@ php artisan serve                 # http://127.0.0.1:8000
 cd ../web && npm run dev          # http://localhost:5173
 ```
 
-> `docker compose up --build` starts all of this in one command, including the worker and
-> a scheduler — see [README.md](README.md). It has not been booted end to end, so for the
-> defense itself prefer the manual steps above, which have.
+> `docker compose up --build` starts all of this in one command — including the worker and
+> the scheduler, so neither can be forgotten — and has been verified end to end. See
+> [README.md](README.md). The OTP then comes from `docker compose logs -f api` instead of
+> `pail`, and MySQL is on port **3307**. Either path works for the defense; the first
+> `--build` needs a few minutes, so do it well before the room fills.
 
 Also open a fifth terminal tailing the log — **this is where every OTP and SMS appears**, because
 the `SmsGateway` adapter runs in log mode (CLAUDE.md rule 4, no real carrier):

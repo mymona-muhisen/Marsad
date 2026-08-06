@@ -79,7 +79,9 @@ and scheduler cannot race the API into building the same schema. To re-seed, del
 sentinel and restart: `docker compose run --rm api-migrate sh -c 'rm -f storage/app/.seeded'`.
 
 OTP codes are still written to the log rather than sent — read them with
-`docker compose logs -f api`.
+`docker compose logs -f api`. The stack sets `LOG_CHANNEL=stderr` **and**
+`SMS_LOG_CHANNEL=stderr` so they reach stdout; `LogSmsGateway` names its channel
+explicitly, so setting only the first leaves the code in a file inside the container.
 
 Ports are offset from the defaults (MySQL on **3307**, Redis on **6380**) because this
 project is developed against XAMPP, which already holds 3306.
@@ -90,9 +92,10 @@ only because no local Redis server was available — and it uses Mailpit rather 
 unmaintained MailHog. Nothing in the app sends mail today (`NotificationChannel` is
 `sms`/`inapp`), so that inbox stays empty by design.
 
-> **Not verified end to end.** Docker is not installed in the environment this was
-> written in, so unlike the rest of the project the compose stack has never been booted.
-> The YAML and the dependency graph were checked by parsing, not by running.
+Verified by booting it: all eight services healthy, the seed applied, and the demo chain
+run inside the stack — a liability decision queued to Redis, picked up by the worker,
+the signed PDF written to the shared volume, and the public `/verify` endpoint returning
+that report. First `--build` takes a few minutes.
 
 ## Demo sign-ins (dev only)
 
