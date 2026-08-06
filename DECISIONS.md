@@ -876,8 +876,6 @@ Redis: the `database` default recorded earlier exists *only* because no local Re
 
 One real defect surfaced only by running it: the OTP was **not** in `docker compose logs api`, because Laravel writes to `storage/logs/laravel.log` inside the container while the README told the reader to watch stdout. Fixed with `LOG_CHANNEL=stderr` **and** `SMS_LOG_CHANNEL=stderr` — both are needed, since `LogSmsGateway` resolves its channel by name and ignores the app default. Parsing the YAML could never have caught this; only reading for the code and not finding it could.
 
-## Template
-
 Mailpit will sit empty: nothing sends mail (`NotificationChannel` is `sms`/`inapp`, and there is no `Mail::` call in the codebase). It is included so that mail, if ever added, is caught rather than dropped by `MAIL_MAILER=log`.
 
 ## Template
