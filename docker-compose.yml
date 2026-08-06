@@ -89,6 +89,13 @@ services:
       MAIL_HOST: mailpit
       MAIL_PORT: '1025'
 
+      # Logs belong on stdout in a container, not in a file nobody will think
+      # to open. Both vars are needed: LogSmsGateway asks for the channel named
+      # by SMS_LOG_CHANNEL explicitly, so LOG_CHANNEL alone leaves the OTP in
+      # storage/logs/laravel.log — verified the hard way.
+      LOG_CHANNEL: stderr
+      SMS_LOG_CHANNEL: stderr
+
       # The OTP is written to the log, not sent — read it with
       # `docker compose logs -f api` (CLAUDE.md rule #4, log SmsGateway).
       SMS_DRIVER: log

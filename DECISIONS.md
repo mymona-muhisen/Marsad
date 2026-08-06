@@ -872,7 +872,11 @@ Assignment is a column rather than a join table: a claim has at most one assesso
 
 Redis: the `database` default recorded earlier exists *only* because no local Redis server was available. Compose provides one, so this is where the target CLAUDE.md actually specifies becomes reachable. Mailpit: MailHog is unmaintained and ships no arm64 image; same SMTP catch-all role. Ports are offset because this project is developed against XAMPP, whose MySQL already holds 3306 — binding there would fail on the developer's own machine.
 
-**Impact:** **The stack has never been booted.** Docker is not installed in this environment, so unlike every other claim in this file it was verified by parsing the YAML and checking the dependency graph, not by running it. The most likely failure points are the `pecl install redis` build step and the healthcheck commands. README and DEMO.md both say so, and DEMO.md steers the defense itself to the manual path that has been exercised end to end.
+**Impact:** Now verified by booting it — Docker was installed after this was written. All eight services come up healthy, `api-migrate` exits 0, and the demo chain runs inside the stack: a decision queued to Redis, processed by the worker, the signed PDF written to the shared volume, and `/verify` returning that report. Both predicted failure points (`pecl install redis`, the healthchecks) turned out fine.
+
+One real defect surfaced only by running it: the OTP was **not** in `docker compose logs api`, because Laravel writes to `storage/logs/laravel.log` inside the container while the README told the reader to watch stdout. Fixed with `LOG_CHANNEL=stderr` **and** `SMS_LOG_CHANNEL=stderr` — both are needed, since `LogSmsGateway` resolves its channel by name and ignores the app default. Parsing the YAML could never have caught this; only reading for the code and not finding it could.
+
+## Template
 
 Mailpit will sit empty: nothing sends mail (`NotificationChannel` is `sms`/`inapp`, and there is no `Mail::` call in the codebase). It is included so that mail, if ever added, is caught rather than dropped by `MAIL_MAILER=log`.
 
